@@ -52,8 +52,7 @@ A escolha das ferramentas priorizou a robustez, a facilidade de manutenção e a
 O projeto segue padrões de design para garantir **baixa acoplagem e alta coesão**:
 
 * **Padrão MVC (Model-View-Controller):** Separação clara entre a lógica de negócios, a camada de dados e a interface do usuário.
-* **MVC com DAO (Data Access Object):** A lógica de acesso a dados e regras de negócio está encapsulada nos Models. Isso centraliza as consultas SQL, evitando código duplicado e facilitando a manutenção, mantendo os Controllers leves ("Skinny Controllers").
-* **API-Ready:** O back-end foi estruturado para devolver dados estruturados (JSON) quando necessário, facilitando a criação futura de um aplicativo móvel.
+* **MVC com DAO (Data Access Object):** A lógica de acesso a dados e regras de negócio está encapsulada nos Models. Isso centraliza as consultas SQL, evitando código duplicado e facilitando a manutenção.
 * **Tratamento de Erros:** Implementação de `try/catch` global. Erros críticos geram logs no servidor (para auditoria), mas exibem mensagens amigáveis ao usuário final, evitando *stack traces* expostos (Security by Obscurity).
 
 ---
