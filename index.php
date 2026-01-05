@@ -3,7 +3,7 @@ session_start();
 
 // Se estiver logado, vai para painel
 if (isset($_SESSION['usuario_id'])) {
-    header("Location: views/painel.php");
+    header("Location: views/sistema/painel.php");
     exit();
 }
 
@@ -57,7 +57,7 @@ if (isset($_SESSION['usuario_id'])) {
 
                         <div class="row justify-content-center">
                             <div class="col-md-6">
-                                <a href="menu-principal.php" class="btn btn-outline-primary w-100">
+                                <a href="views/site/menu-principal.php" class="btn btn-outline-primary w-100">
                                     Ver Portfólio Institucional
                                 </a>
                             </div>

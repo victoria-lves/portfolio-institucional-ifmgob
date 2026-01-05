@@ -9,10 +9,11 @@ session_start();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="keywords" content="IFMG Ouro Branco, Instituto Federal Minas Gerais, cursos técnicos gratuitos, ensino de qualidade Ouro Branco, estrutura organizacional IFMG, direção campus Ouro Branco, documentos institucionais IFMG, regulamentos IFMG campus Ouro Branco">
+    <meta name="keywords"
+        content="IFMG Ouro Branco, Instituto Federal Minas Gerais, cursos técnicos gratuitos, ensino de qualidade Ouro Branco, estrutura organizacional IFMG, direção campus Ouro Branco, documentos institucionais IFMG, regulamentos IFMG campus Ouro Branco">
     <title>IFMG Ouro Branco | Futuro em Movimento</title>
 
-    <link rel="stylesheet" href="css/style-menu-principal.css">
+    <link rel="stylesheet" href="../../assets/css/style-menu-principal.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
     <link
         href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@700&family=Poppins:wght@300;400;600&display=swap"
@@ -23,7 +24,7 @@ session_start();
     <header>
         <div class="container header-content">
             <a href="menu-principal.php" id="logo-link">
-                <img src="img/logo-branco.png" alt="Logo IFMG" id="logo" />
+                <img src="../../assets/img/logo-branco.png" alt="Logo IFMG" id="logo" />
             </a>
 
             <button class="menu-toggle" id="menuToggle">
@@ -33,15 +34,15 @@ session_start();
             <nav class="nav-items" id="navMenu">
                 <a href="menu-cursos.php">Cursos</a>
                 <a href="menu-laboratorios.html">Laboratórios</a>
-                <a href="menu-docentes.php">Docentes</a>
+                <a href="menu-professores.php">Docentes</a>
                 <a href="menu-projetos.php">Projetos</a>
 
                 <?php if (isset($_SESSION['usuario_id'])): ?>
-                    <a href="views/painel.php" class="btn-login">
+                    <a href="views/sistema/painel.php" class="btn-login">
                         <i class="fa-solid fa-user"></i> Painel
                     </a>
                 <?php else: ?>
-                    <a href="views/auth/login.php" class="btn-login">Acesso Restrito</a>
+                    <a href="../auth/login.php" class="btn-login">Acesso Restrito</a>
                 <?php endif; ?>
             </nav>
         </div>
@@ -49,7 +50,8 @@ session_start();
 
     <main>
         <section class="theme">
-            <div class="theme-overlay"></div> <div class="container theme-content">
+            <div class="theme-overlay"></div>
+            <div class="container theme-content">
                 <h1 class="theme-title">Transforme o seu <br>Futuro Agora</h1>
                 <p class="theme-desc">Ensino público, gratuito e de excelência. Conectando teoria e prática em um
                     ambiente inovador.</p>
@@ -158,7 +160,8 @@ session_start();
                     </div>
                     <div class="info-highlight">
                         <h4><i class="fa-solid fa-medal"></i> Reconhecimento Nacional</h4>
-                        <p>O IFMG Campus Ouro Branco é referência em educação técnica e tecnológica em Minas Gerais...</p>
+                        <p>O IFMG Campus Ouro Branco é referência em educação técnica e tecnológica em Minas Gerais...
+                        </p>
                         <p>Nossos cursos são constantemente atualizados para atender às demandas do mercado...</p>
                     </div>
                 </div>
@@ -183,7 +186,8 @@ session_start();
             <div class="footer-content">
                 <div class="footer-section">
                     <h4>Endereço</h4>
-                    <p><i class="fa-solid fa-location-dot"></i> Rua Afonso Sardinha, 90<br />Ouro Branco, MG - 36420-000</p>
+                    <p><i class="fa-solid fa-location-dot"></i> Rua Afonso Sardinha, 90<br />Ouro Branco, MG - 36420-000
+                    </p>
                 </div>
                 <div class="footer-section">
                     <h4>Funcionamento</h4>
@@ -219,7 +223,7 @@ session_start();
         menuToggle.addEventListener('click', () => {
             // Alterna a classe 'active' para mostrar/esconder o menu
             navMenu.classList.toggle('active');
-            
+
             // Alterna o ícone entre Barras (fechado) e X (aberto)
             menuToggle.innerHTML = navMenu.classList.contains('active')
                 ? '<i class="fa-solid fa-xmark"></i>'

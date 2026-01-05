@@ -12,7 +12,7 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_nivel'] != 'admin') {
     exit();
 }
 
-require_once '../../config/database.php';
+require_once '../../../config/database.php';
 // require_once '../../models/Usuario.php'; // O modelo Usuario fornecido não tem método listar, faremos via PDO direto
 
 $database = new Database();
@@ -181,7 +181,7 @@ unset($_SESSION['erro']);
                     <a href="create.php" class="btn btn-light">
                         <i class="bi bi-person-plus-fill me-1"></i> Novo Usuário
                     </a>
-                    <a href="../painel.php" class="btn btn-outline-light ms-2">
+                    <a href="../sistema/painel.php" class="btn btn-outline-light ms-2">
                         <i class="bi bi-arrow-left me-1"></i> Painel
                     </a>
                 </div>

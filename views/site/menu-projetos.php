@@ -1,7 +1,7 @@
 <?php
 // 1. Configuração da Conexão (PDO)
 // Importa o arquivo de configuração do banco
-require_once 'config/database.php';
+require_once '../../config/database.php';
 // Instancia a classe Database
 $database = new Database();
 // Obtém a conexão ativa
@@ -27,10 +27,11 @@ try {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="keywords" content="projetos pesquisa IFMG Ouro Branco, projetos ensino IFMG Ouro Branco, projetos extensão campus Ouro Branco, trabalhos acadêmicos IFMG, iniciação científica IFMG, inovação tecnologia IFMG projetos, projetos metalurgia, projetos informática, projetos administração">
+  <meta name="keywords"
+    content="projetos pesquisa IFMG Ouro Branco, projetos ensino IFMG Ouro Branco, projetos extensão campus Ouro Branco, trabalhos acadêmicos IFMG, iniciação científica IFMG, inovação tecnologia IFMG projetos, projetos metalurgia, projetos informática, projetos administração">
 
   <title>Projetos de Pesquisa e Extensão | IFMG Ouro Branco</title>
-  <link rel="stylesheet" href="css/style-menu-projetos.css">
+  <link rel="stylesheet" href="../../assets/css/style-menu-projetos.css">
   <link
     href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@700&family=Poppins:wght@300;400;600&display=swap"
     rel="stylesheet">
@@ -42,7 +43,7 @@ try {
   <header>
     <div class="container header-content">
       <a href="menu-principal.php" id="logo-link" aria-label="Voltar para a página inicial">
-        <img src="img/logo-branco.png" alt="Logo do IFMG Campus Ouro Branco" id="logo">
+        <img src="../../assets/img/logo-branco.png" alt="Logo do IFMG Campus Ouro Branco" id="logo">
       </a>
 
       <button class="menu-toggle" aria-label="Abrir menu">
@@ -52,9 +53,9 @@ try {
       <nav class="nav-items">
         <a href="menu-cursos.php">Cursos</a>
         <a href="menu-laboratorios.html">Laboratórios</a>
-        <a href="menu-docentes.php">Docentes</a>
+        <a href="menu-professores.php">Docentes</a>
         <a href="menu-projetos.php" class="active">Projetos</a>
-        <a href="views/auth/login.php" class="btn-login">Acesso Restrito</a>
+        <a href="../auth/login.php" class="btn-login">Acesso Restrito</a>
       </nav>
     </div>
   </header>

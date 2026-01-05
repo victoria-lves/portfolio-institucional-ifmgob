@@ -14,9 +14,9 @@ if (!isset($_GET['id'])) {
     exit();
 }
 
-$id_projeto = (int)$_GET['id'];
+$id_projeto = (int) $_GET['id'];
 
-require_once '../../config/database.php';
+require_once '../../../config/database.php';
 require_once '../../models/Professor.php'; // Para listar todos no select
 
 $database = new Database();
@@ -73,7 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $db->beginTransaction();
 
         // Validação (REMOVIDO data_inicio DAQUI)
-        if(empty($_POST['titulo']) || empty($_POST['descricao'])) {
+        if (empty($_POST['titulo']) || empty($_POST['descricao'])) {
             throw new Exception("Preencha os campos obrigatórios (Título e Descrição).");
         }
 
@@ -138,7 +138,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // 4. Inserir novos autores
         $sql_ins = "INSERT INTO professor_projeto (id_professor, id_projeto) VALUES (:id_prof, :id_proj)";
         $stmt_ins = $db->prepare($sql_ins);
-        
+
         foreach ($ids_novos_autores as $id_prof) {
             $stmt_ins->execute([':id_prof' => $id_prof, ':id_proj' => $id_projeto]);
         }
@@ -146,17 +146,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // --- ATUALIZAR IMAGEM (CAPA) ---
         // Aqui estamos adicionando uma nova imagem na tabela 'imagens'. 
         // Se quiser substituir a capa, a lógica seria deletar a antiga antes.
-        if(isset($_FILES['imagem']) && $_FILES['imagem']['error'] === UPLOAD_ERR_OK) {
+        if (isset($_FILES['imagem']) && $_FILES['imagem']['error'] === UPLOAD_ERR_OK) {
             $extensao = strtolower(pathinfo($_FILES['imagem']['name'], PATHINFO_EXTENSION));
             $permitidos = ['jpg', 'jpeg', 'png', 'webp'];
-            
-            if(in_array($extensao, $permitidos)) {
+
+            if (in_array($extensao, $permitidos)) {
                 $dir = "../../img/projetos/";
-                if (!is_dir($dir)) mkdir($dir, 0777, true); // Garante que a pasta existe
+                if (!is_dir($dir))
+                    mkdir($dir, 0777, true); // Garante que a pasta existe
 
                 $novo_nome = uniqid('proj_') . '.' . $extensao;
-                
-                if(move_uploaded_file($_FILES['imagem']['tmp_name'], $dir . $novo_nome)) {
+
+                if (move_uploaded_file($_FILES['imagem']['tmp_name'], $dir . $novo_nome)) {
                     $sql_img = "INSERT INTO imagens (caminho, id_projeto, legenda) VALUES (:c, :id, 'Capa')";
                     $stmt_img = $db->prepare($sql_img);
                     $stmt_img->execute([':c' => $novo_nome, ':id' => $id_projeto]);
@@ -170,7 +171,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
 
     } catch (Exception $e) {
-        if($db->inTransaction()) $db->rollBack();
+        if ($db->inTransaction())
+            $db->rollBack();
         $erro = $e->getMessage();
     }
 }
@@ -178,24 +180,57 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editar Projeto - IFMG</title>
-    
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta3/dist/css/bootstrap-select.min.css">
-    
+    <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta3/dist/css/bootstrap-select.min.css">
+
     <style>
-        :root { --ifmg-azul: #1a2980; --ifmg-verde: #26d0ce; }
-        body { background-color: #f8f9fa; }
-        .page-header { background: linear-gradient(90deg, var(--ifmg-azul) 0%, var(--ifmg-verde) 100%); color: white; padding: 30px 0; margin-bottom: 30px; }
-        .form-card { background: white; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); padding: 25px; margin-bottom: 25px; }
-        .section-title { border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; margin-bottom: 20px; color: var(--ifmg-azul); font-weight: 600; }
-        .required::after { content: " *"; color: #dc3545; }
+        :root {
+            --ifmg-azul: #1a2980;
+            --ifmg-verde: #26d0ce;
+        }
+
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .page-header {
+            background: linear-gradient(90deg, var(--ifmg-azul) 0%, var(--ifmg-verde) 100%);
+            color: white;
+            padding: 30px 0;
+            margin-bottom: 30px;
+        }
+
+        .form-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            color: var(--ifmg-azul);
+            font-weight: 600;
+        }
+
+        .required::after {
+            content: " *";
+            color: #dc3545;
+        }
     </style>
 </head>
+
 <body>
 
     <div class="page-header">
@@ -209,7 +244,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 
     <div class="container">
-        <?php if(isset($erro)): ?>
+        <?php if (isset($erro)): ?>
             <div class="alert alert-danger alert-dismissible fade show">
                 <i class="bi bi-exclamation-triangle-fill me-2"></i> <?php echo $erro; ?>
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
@@ -220,21 +255,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="row">
                 <div class="col-lg-8">
                     <div class="form-card">
-                        
+
                         <div class="alert alert-light border-primary border mb-4">
                             <label class="form-label fw-bold text-primary required">Autores do Projeto</label>
-                            <select class="selectpicker form-control" name="professores[]" id="selectProfessor" 
-                                    multiple data-live-search="true" data-selected-text-format="count > 3" 
-                                    title="Selecione os autores..." required onchange="atualizarCampoAutor()">
-                                
-                                <?php foreach($todos_professores as $prof): ?>
-                                    <?php 
-                                        // Verifica se este professor já é autor
-                                        $selected = in_array($prof['id'], $autores_atuais) ? 'selected' : '';
+                            <select class="selectpicker form-control" name="professores[]" id="selectProfessor" multiple
+                                data-live-search="true" data-selected-text-format="count > 3"
+                                title="Selecione os autores..." required onchange="atualizarCampoAutor()">
+
+                                <?php foreach ($todos_professores as $prof): ?>
+                                    <?php
+                                    // Verifica se este professor já é autor
+                                    $selected = in_array($prof['id'], $autores_atuais) ? 'selected' : '';
                                     ?>
-                                    <option value="<?php echo $prof['id']; ?>" 
-                                            data-nome="<?php echo htmlspecialchars($prof['nome']); ?>" 
-                                            <?php echo $selected; ?>>
+                                    <option value="<?php echo $prof['id']; ?>"
+                                        data-nome="<?php echo htmlspecialchars($prof['nome']); ?>" <?php echo $selected; ?>>
                                         <?php echo htmlspecialchars($prof['nome']); ?>
                                     </option>
                                 <?php endforeach; ?>
@@ -242,10 +276,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>
 
                         <h5 class="section-title">Dados Básicos</h5>
-                        
+
                         <div class="mb-3">
                             <label class="form-label required">Título do Projeto</label>
-                            <input type="text" class="form-control" name="titulo" value="<?php echo htmlspecialchars($projeto['titulo']); ?>" required>
+                            <input type="text" class="form-control" name="titulo"
+                                value="<?php echo htmlspecialchars($projeto['titulo']); ?>" required>
                         </div>
 
                         <div class="row">
@@ -275,24 +310,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                         <div class="mb-3">
                             <label class="form-label required">Descrição</label>
-                            <textarea class="form-control" name="descricao" rows="5" required><?php echo htmlspecialchars($projeto['descricao']); ?></textarea>
+                            <textarea class="form-control" name="descricao" rows="5"
+                                required><?php echo htmlspecialchars($projeto['descricao']); ?></textarea>
                         </div>
 
                         <h5 class="section-title mt-4">Detalhes Acadêmicos</h5>
-                        
+
                         <div class="mb-3">
                             <label class="form-label">Objetivos</label>
-                            <textarea class="form-control" name="objetivos" rows="3"><?php echo htmlspecialchars($projeto['objetivos']); ?></textarea>
+                            <textarea class="form-control" name="objetivos"
+                                rows="3"><?php echo htmlspecialchars($projeto['objetivos']); ?></textarea>
                         </div>
-                        
+
                         <div class="mb-3">
                             <label class="form-label">Resultados</label>
-                            <textarea class="form-control" name="resultados" rows="3"><?php echo htmlspecialchars($projeto['resultados']); ?></textarea>
+                            <textarea class="form-control" name="resultados"
+                                rows="3"><?php echo htmlspecialchars($projeto['resultados']); ?></textarea>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label">Parcerias</label>
-                            <input type="text" class="form-control" name="parceria" value="<?php echo htmlspecialchars($projeto['parceria']); ?>">
+                            <input type="text" class="form-control" name="parceria"
+                                value="<?php echo htmlspecialchars($projeto['parceria']); ?>">
                         </div>
                     </div>
                 </div>
@@ -300,22 +339,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="col-lg-4">
                     <div class="form-card">
                         <h5 class="section-title">Configurações</h5>
-                        
+
                         <div class="mb-3">
                             <label class="form-label required">Orientador(es)</label>
-                            <input type="text" class="form-control" name="autor" id="campoAutor" 
-                                   value="<?php echo htmlspecialchars($projeto['autor']); ?>" required>
-                            <div class="form-text">Este campo é atualizado automaticamente ao selecionar os autores acima.</div>
+                            <input type="text" class="form-control" name="autor" id="campoAutor"
+                                value="<?php echo htmlspecialchars($projeto['autor']); ?>" required>
+                            <div class="form-text">Este campo é atualizado automaticamente ao selecionar os autores
+                                acima.</div>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label">Data Início</label>
-                            <input type="date" class="form-control" name="data_inicio" value="<?php echo $projeto['data_inicio']; ?>">
+                            <input type="date" class="form-control" name="data_inicio"
+                                value="<?php echo $projeto['data_inicio']; ?>">
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label">Data Fim</label>
-                            <input type="date" class="form-control" name="data_fim" value="<?php echo $projeto['data_fim']; ?>">
+                            <input type="date" class="form-control" name="data_fim"
+                                value="<?php echo $projeto['data_fim']; ?>">
                         </div>
 
                         <div class="mb-3">
@@ -326,7 +368,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                         <div class="mb-3">
                             <label class="form-label">Links</label>
-                            <input type="text" class="form-control" name="links" value="<?php echo htmlspecialchars($projeto['links']); ?>">
+                            <input type="text" class="form-control" name="links"
+                                value="<?php echo htmlspecialchars($projeto['links']); ?>">
                         </div>
                     </div>
 
@@ -334,20 +377,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <h5 class="section-title">Financiamento</h5>
                         <div class="mb-3">
                             <label class="form-label">Alunos Envolvidos</label>
-                            <textarea class="form-control" name="alunos_envolvidos" rows="2"><?php echo htmlspecialchars($projeto['alunos_envolvidos']); ?></textarea>
+                            <textarea class="form-control" name="alunos_envolvidos"
+                                rows="2"><?php echo htmlspecialchars($projeto['alunos_envolvidos']); ?></textarea>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Agência</label>
-                            <input type="text" class="form-control" name="agencia_financiadora" value="<?php echo htmlspecialchars($projeto['agencia_financiadora']); ?>">
+                            <input type="text" class="form-control" name="agencia_financiadora"
+                                value="<?php echo htmlspecialchars($projeto['agencia_financiadora']); ?>">
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Valor (R$)</label>
-                            <input type="number" step="0.01" class="form-control" name="financiamento" value="<?php echo htmlspecialchars($projeto['financiamento']); ?>">
+                            <input type="number" step="0.01" class="form-control" name="financiamento"
+                                value="<?php echo htmlspecialchars($projeto['financiamento']); ?>">
                         </div>
                     </div>
 
                     <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-success btn-lg"><i class="bi bi-check-lg"></i> Salvar Alterações</button>
+                        <button type="submit" class="btn btn-success btn-lg"><i class="bi bi-check-lg"></i> Salvar
+                            Alterações</button>
                         <a href="index.php" class="btn btn-outline-secondary">Cancelar</a>
                     </div>
                 </div>
@@ -360,8 +407,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta3/dist/js/bootstrap-select.min.js"></script>
 
     <script>
-        $(document).ready(function() {
-            if($.fn.selectpicker) {
+        $(document).ready(function () {
+            if ($.fn.selectpicker) {
                 $('.selectpicker').selectpicker();
             }
         });
@@ -369,16 +416,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         function atualizarCampoAutor() {
             var selectedOptions = document.querySelectorAll('#selectProfessor option:checked');
             var nomes = [];
-            selectedOptions.forEach(function(option) {
+            selectedOptions.forEach(function (option) {
                 nomes.push(option.getAttribute('data-nome'));
             });
-            
+
             var campoAutor = document.getElementById('campoAutor');
             campoAutor.value = nomes.join(', ');
-            
+
             campoAutor.style.backgroundColor = "#e8f0fe";
             setTimeout(() => { campoAutor.style.backgroundColor = ""; }, 500);
         }
     </script>
 </body>
+
 </html>

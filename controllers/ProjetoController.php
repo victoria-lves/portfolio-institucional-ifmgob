@@ -1,7 +1,7 @@
 <?php
 // controllers/ProjetoController.php
 session_start();
-require_once '../config/database.php';
+require_once '../../config/database.php';
 require_once '../models/Projeto.php';
 
 class ProjetoController
@@ -29,7 +29,7 @@ class ProjetoController
         // Verificar permissão (Admin ou Professor)
         if ($_SESSION['usuario_nivel'] != 'admin' && $_SESSION['usuario_nivel'] != 'professor') {
             $_SESSION['erro'] = "Acesso não autorizado!";
-            header("Location: ../painel.php");
+            header("Location: ../sistema/painel.php");
             exit();
         }
 

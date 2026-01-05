@@ -1,6 +1,6 @@
 <?php
 // painel.php - Painel Principal
-// Local: sistema-ifmg/views/painel.php
+// Local: sistema-ifmg/views/sistema/painel.php
 
 session_start();
 
@@ -23,10 +23,10 @@ if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY'] > 
 $_SESSION['LAST_ACTIVITY'] = time();
 
 // Conectar ao banco
-require_once '../config/database.php';
-require_once '../models/Professor.php';
-require_once '../models/Projeto.php';
-require_once '../models/Producao.php';
+require_once '../../config/database.php';
+require_once '../../models/Professor.php';
+require_once '../../models/Projeto.php';
+require_once '../../models/Producao.php';
 
 $database = new Database();
 $db = $database->getConnection();
@@ -517,7 +517,7 @@ unset($_SESSION['erro']);
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link" href="../menu-principal.php">
+                    <a class="nav-link" href="../views/site/menu-principal.php">
                         <span class="nav-icon"><i class="bi bi-eye"></i></span>
                         <span>Ver Site Público</span>
                     </a>
@@ -732,7 +732,7 @@ unset($_SESSION['erro']);
                 </div>
 
                 <div class="col-md-3">
-                    <a href="../menu-principal.php" class="action-btn">
+                    <a href="../views/site/menu-principal.php" class="action-btn">
                         <div class="action-icon text-info">
                             <i class="bi bi-eye"></i>
                         </div>

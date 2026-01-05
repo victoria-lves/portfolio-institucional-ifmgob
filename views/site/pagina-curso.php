@@ -1,7 +1,7 @@
 <?php
 // 1. Configuração da Conexão (PDO)
 // Carrega o arquivo de configuração do banco de dados
-require_once 'config/database.php';
+require_once '../../config/database.php';
 // Instancia a classe Database
 $database = new Database();
 // Obtém a conexão ativa com o banco
@@ -39,7 +39,7 @@ if (!$curso) {
 $img_capa = !empty($curso['imagem']) ? $curso['imagem'] : 'img/escola.png';
 
 // Verifica se a chave 'nivel' existe para evitar erros de índice indefinido
-$nivel_curso = isset($curso['nivel']) ? $curso['nivel'] : ''; 
+$nivel_curso = isset($curso['nivel']) ? $curso['nivel'] : '';
 
 // Lógica para definir Keywords baseadas no Título do Curso (assumindo que $curso['nome'] ou $titulo já foi carregado do banco)
 $keywords_curso = "";
@@ -50,44 +50,35 @@ $nome_curso_check = mb_strtolower($curso['nome'] ?? ''); // Use a variável que 
 if (strpos($nome_curso_check, 'administração') !== false && strpos($nome_curso_check, 'técnico') !== false) {
     // Técnico em Administração
     $keywords_curso = "técnico em administração integrado IFMG Ouro Branco, curso técnico administração ensino médio Ouro Branco, administração integrado IFMG duração, mercado trabalho técnico administração";
-} 
-elseif (strpos($nome_curso_check, 'informática') !== false && strpos($nome_curso_check, 'técnico') !== false) {
+} elseif (strpos($nome_curso_check, 'informática') !== false && strpos($nome_curso_check, 'técnico') !== false) {
     // Técnico em Informática
     $keywords_curso = "técnico em informática IFMG Ouro Branco, curso técnico informática integrado, formação técnica informática campus Ouro Branco, tecnologia informação IFMG";
-}
-elseif (strpos($nome_curso_check, 'metalurgia') !== false && strpos($nome_curso_check, 'técnico') !== false) {
+} elseif (strpos($nome_curso_check, 'metalurgia') !== false && strpos($nome_curso_check, 'técnico') !== false) {
     // Verifica se é subsequente ou integrado
     if (strpos($nome_curso_check, 'subsequente') !== false) {
         $keywords_curso = "técnico metalurgia subsequente IFMG, curso metalurgia para quem já tem ensino médio, metalurgia formação rápida IFMG Ouro Branco";
     } else {
         $keywords_curso = "técnico em metalurgia IFMG Ouro Branco, curso metalurgia integrado ensino médio, formação técnica metalurgia Minas Gerais, metalurgia IFMG mercado trabalho";
     }
-}
-elseif (strpos($nome_curso_check, 'sistemas de informação') !== false) {
+} elseif (strpos($nome_curso_check, 'sistemas de informação') !== false) {
     // Sistemas de Informação
     $keywords_curso = "bacharelado sistemas informação IFMG Ouro Branco, curso SI graduação IFMG, tecnologia informação graduação campus Ouro Branco, Sistemas de Informação nota corte IFMG";
-}
-elseif (strpos($nome_curso_check, 'engenharia metalúrgica') !== false) {
+} elseif (strpos($nome_curso_check, 'engenharia metalúrgica') !== false) {
     // Engenharia
     $keywords_curso = "engenharia metalúrgica IFMG Ouro Branco, curso engenharia metalúrgica Minas Gerais, graduação metalurgia IFMG, engenheiro metalurgista formação IFMG";
-}
-elseif (strpos($nome_curso_check, 'administração') !== false && strpos($nome_curso_check, 'bacharelado') !== false) {
+} elseif (strpos($nome_curso_check, 'administração') !== false && strpos($nome_curso_check, 'bacharelado') !== false) {
     // ADM Bacharelado
     $keywords_curso = "administração bacharelado IFMG Ouro Branco, curso administração graduação campus Ouro Branco, ADM IFMG duração, administração empresas formação IFMG";
-}
-elseif (strpos($nome_curso_check, 'pedagogia') !== false) {
+} elseif (strpos($nome_curso_check, 'pedagogia') !== false) {
     // Pedagogia
     $keywords_curso = "pedagogia licenciatura IFMG Ouro Branco, curso formação professores IFMG, licenciatura pedagogia campus Ouro Branco, pedagogia IFMG grade curricular";
-}
-elseif (strpos($nome_curso_check, 'gestão de negócios') !== false) {
+} elseif (strpos($nome_curso_check, 'gestão de negócios') !== false) {
     // Especialização
     $keywords_curso = "especialização gestão negócios IFMG, pós-graduação gestão empresarial Ouro Branco, MBA gestão IFMG, especialização administração IFMG";
-}
-elseif (strpos($nome_curso_check, 'profept') !== false) {
+} elseif (strpos($nome_curso_check, 'profept') !== false) {
     // PROFEPT
     $keywords_curso = "PROFEPT IFMG Ouro Branco, especialização formação professores educação profissional, pós-graduação educação profissional IFMG, PROFEPT 2025 inscrições";
-}
-else {
+} else {
     // Padrão caso não ache
     $keywords_curso = "curso IFMG Ouro Branco, ensino gratuito, federal ouro branco";
 }
@@ -106,7 +97,7 @@ else {
         href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@700&family=Poppins:wght@300;400;600&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
-    <link rel="stylesheet" href="css/style-pagina-curso.css">
+    <link rel="stylesheet" href="../../assets/css/style-pagina-curso.css">
 </head>
 
 <body>
@@ -114,7 +105,7 @@ else {
     <header>
         <div class="container header-content">
             <a href="menu-principal.php" id="logo-link" aria-label="Voltar para a página inicial">
-                <img src="img/logo-branco.png" alt="Logo do IFMG Campus Ouro Branco" id="logo" />
+                <img src="../../assets/img/logo-branco.png" alt="Logo do IFMG Campus Ouro Branco" id="logo" />
             </a>
 
             <button class="menu-toggle" aria-label="Abrir menu de navegação">
@@ -124,9 +115,9 @@ else {
             <nav class="nav-items">
                 <a href="menu-cursos.php" class="active">Cursos</a>
                 <a href="menu-laboratorios.html">Laboratórios</a>
-                <a href="menu-docentes.php">Docentes</a>
+                <a href="menu-professores.php">Docentes</a>
                 <a href="menu-projetos.php">Projetos</a>
-                <a href="views/auth/login.php" class="btn-login">Acesso Restrito</a>
+                <a href="../auth/login.php" class="btn-login">Acesso Restrito</a>
             </nav>
         </div>
     </header>

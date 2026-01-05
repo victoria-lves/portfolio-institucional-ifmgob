@@ -5,7 +5,7 @@
 
 session_start();
 
-require_once '../config/database.php';
+require_once '../../config/database.php';
 require_once '../models/Usuario.php';
 
 class UsuarioController
@@ -24,7 +24,7 @@ class UsuarioController
     {
         // Apenas admin pode criar
         if (!isset($_SESSION['usuario_nivel']) || $_SESSION['usuario_nivel'] != 'admin') {
-            header("Location: ../views/painel.php");
+            header("Location: ../views/sistema/painel.php");
             exit();
         }
 
@@ -58,7 +58,7 @@ class UsuarioController
         // 1. Verificação de Segurança
         if (!isset($_SESSION['usuario_nivel']) || $_SESSION['usuario_nivel'] != 'admin') {
             $_SESSION['erro'] = "Acesso negado.";
-            header("Location: ../views/painel.php");
+            header("Location: ../views/sistema/painel.php");
             exit();
         }
 
@@ -101,7 +101,7 @@ if (isset($_GET['action'])) {
             $controller->delete();
             break;
         default:
-            header("Location: ../views/painel.php");
+            header("Location: ../views/sistema/painel.php");
             break;
     }
 }

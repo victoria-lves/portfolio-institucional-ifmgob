@@ -11,7 +11,7 @@ if (!isset($_SESSION['usuario_id'])) {
     exit();
 }
 
-require_once '../../config/database.php';
+require_once '../../../config/database.php';
 require_once '../../models/Projeto.php';
 require_once '../../models/Professor.php';
 
@@ -353,7 +353,8 @@ unset($_SESSION['erro']);
                 </div>
                 <div>
                     <a href="create.php" class="btn btn-light"><i class="bi bi-plus-circle me-1"></i> Novo Projeto</a>
-                    <a href="../painel.php" class="btn btn-outline-light ms-2"><i class="bi bi-arrow-left me-1"></i>
+                    <a href="../sistema/painel.php" class="btn btn-outline-light ms-2"><i
+                            class="bi bi-arrow-left me-1"></i>
                         Painel</a>
                 </div>
             </div>

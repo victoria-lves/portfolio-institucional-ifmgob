@@ -1,7 +1,7 @@
 <?php
 // 1. Configuração do Banco de Dados
 // Importa o arquivo de configuração do banco apenas uma vez para evitar conflitos
-require_once 'config/database.php';
+require_once '../../config/database.php';
 // Instancia a classe Database criada anteriormente
 $database = new Database();
 // Obtém a conexão ativa com o banco de dados
@@ -88,7 +88,7 @@ if (strpos($status_formatado, 'andamento') !== false) {
     <meta name="twitter:image" content="https://seusite.com/img/projetos/<?php echo $projeto['imagem']; ?>">
 
 
-    <link rel="stylesheet" href="css/style-pagina-projeto.css">
+    <link rel="stylesheet" href="../../assets/css/style-pagina-projeto.css">
     <link
         href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@700&family=Poppins:wght@300;400;600&display=swap"
         rel="stylesheet">
@@ -99,7 +99,7 @@ if (strpos($status_formatado, 'andamento') !== false) {
     <header>
         <div class="container header-content">
             <a href="menu-principal.php" id="logo-link">
-                <img src="img/logo-branco.png" alt="IFMG Campus Ouro Branco" id="logo" />
+                <img src="../../assets/img/logo-branco.png" alt="IFMG Campus Ouro Branco" id="logo" />
             </a>
 
             <button class="menu-toggle" onclick="document.querySelector('.nav-items').classList.toggle('active')">
@@ -109,9 +109,9 @@ if (strpos($status_formatado, 'andamento') !== false) {
             <nav class="nav-items">
                 <a href="menu-cursos.php">Cursos</a>
                 <a href="menu-laboratorios.html">Laboratórios</a>
-                <a href="menu-docentes.php">Docentes</a>
+                <a href="menu-professores.php">Docentes</a>
                 <a href="menu-projetos.php" class="active">Projetos</a>
-                <a href="views/auth/login.php" class="btn-login">Acesso Restrito</a>
+                <a href="../auth/login.php" class="btn-login">Acesso Restrito</a>
             </nav>
         </div>
     </header>
@@ -127,17 +127,17 @@ if (strpos($status_formatado, 'andamento') !== false) {
 
                     <div class="projeto-meta">
                         <?php if ($proj['data_inicio']): ?>
-                            <div class="meta-item">
-                                <i class="fas fa-calendar-alt"></i>
-                                <span>Início: <strong><?php echo $data_inicio; ?></strong></span>
-                            </div>
+                                    <div class="meta-item">
+                                        <i class="fas fa-calendar-alt"></i>
+                                        <span>Início: <strong><?php echo $data_inicio; ?></strong></span>
+                                    </div>
                         <?php endif; ?>
 
                         <?php if ($proj['data_fim']): ?>
-                            <div class="meta-item">
-                                <i class="fas fa-calendar-check"></i>
-                                <span>Término: <strong><?php echo $data_fim; ?></strong></span>
-                            </div>
+                                    <div class="meta-item">
+                                        <i class="fas fa-calendar-check"></i>
+                                        <span>Término: <strong><?php echo $data_fim; ?></strong></span>
+                                    </div>
                         <?php endif; ?>
 
                         <div class="meta-item">
@@ -161,13 +161,13 @@ if (strpos($status_formatado, 'andamento') !== false) {
                                 <p><?php echo nl2br(htmlspecialchars($proj['descricao'])); ?></p>
 
                                 <?php if (!empty($proj['objetivos'])): ?>
-                                    <h3 class="mt-4">Objetivos</h3>
-                                    <p><?php echo nl2br(htmlspecialchars($proj['objetivos'])); ?></p>
+                                            <h3 class="mt-4">Objetivos</h3>
+                                            <p><?php echo nl2br(htmlspecialchars($proj['objetivos'])); ?></p>
                                 <?php endif; ?>
 
                                 <?php if (!empty($proj['resultados'])): ?>
-                                    <h3 class="mt-4">Resultados Esperados/Alcançados</h3>
-                                    <p><?php echo nl2br(htmlspecialchars($proj['resultados'])); ?></p>
+                                            <h3 class="mt-4">Resultados Esperados/Alcançados</h3>
+                                            <p><?php echo nl2br(htmlspecialchars($proj['resultados'])); ?></p>
                                 <?php endif; ?>
                             </div>
                         </div>
@@ -176,22 +176,22 @@ if (strpos($status_formatado, 'andamento') !== false) {
                             <h2><i class="fas fa-images"></i> Galeria do Projeto</h2>
                             <div class="card-content">
                                 <?php if (count($imagens) > 0): ?>
-                                    <div class="galeria-grid">
-                                        <?php foreach ($imagens as $img): ?>
-                                            <div class="galeria-item">
-                                                <img src="img/projetos/<?php echo htmlspecialchars($img['caminho']); ?>"
-                                                    alt="<?php echo htmlspecialchars($img['legenda'] ?? 'Imagem do projeto'); ?>"
-                                                    onclick="window.open(this.src, '_blank')">
+                                            <div class="galeria-grid">
+                                                <?php foreach ($imagens as $img): ?>
+                                                            <div class="galeria-item">
+                                                                <img src="../../assets/img/projetos/<?php echo htmlspecialchars($img['caminho']); ?>"
+                                                                    alt="<?php echo htmlspecialchars($img['legenda'] ?? 'Imagem do projeto'); ?>"
+                                                                    onclick="window.open(this.src, '_blank')">
 
-                                                <?php if (!empty($img['legenda'])): ?>
-                                                    <p class="legenda-img"><?php echo htmlspecialchars($img['legenda']); ?></p>
-                                                <?php endif; ?>
+                                                                <?php if (!empty($img['legenda'])): ?>
+                                                                            <p class="legenda-img"><?php echo htmlspecialchars($img['legenda']); ?></p>
+                                                                <?php endif; ?>
+                                                            </div>
+                                                <?php endforeach; ?>
                                             </div>
-                                        <?php endforeach; ?>
-                                    </div>
                                 <?php else: ?>
-                                    <p style="color: #666; font-style: italic;">Nenhuma imagem adicional cadastrada para
-                                        este projeto.</p>
+                                            <p style="color: #666; font-style: italic;">Nenhuma imagem adicional cadastrada para
+                                                este projeto.</p>
                                 <?php endif; ?>
                             </div>
                         </div>
@@ -210,50 +210,50 @@ if (strpos($status_formatado, 'andamento') !== false) {
                                 </div>
 
                                 <?php if (!empty($proj['alunos_envolvidos'])): ?>
-                                    <div class="info-item">
-                                        <div class="info-label"><i class="fas fa-graduation-cap"></i> Alunos Envolvidos
-                                        </div>
-                                        <div class="info-value text-small">
-                                            <?php echo nl2br(htmlspecialchars($proj['alunos_envolvidos'])); ?>
-                                        </div>
-                                    </div>
+                                            <div class="info-item">
+                                                <div class="info-label"><i class="fas fa-graduation-cap"></i> Alunos Envolvidos
+                                                </div>
+                                                <div class="info-value text-small">
+                                                    <?php echo nl2br(htmlspecialchars($proj['alunos_envolvidos'])); ?>
+                                                </div>
+                                            </div>
                                 <?php endif; ?>
 
                                 <?php if (!empty($proj['agencia_financiadora'])): ?>
-                                    <div class="info-item">
-                                        <div class="info-label"><i class="fas fa-university"></i> Agência Fomento</div>
-                                        <div class="info-value">
-                                            <?php echo htmlspecialchars($proj['agencia_financiadora']); ?>
-                                        </div>
-                                    </div>
+                                            <div class="info-item">
+                                                <div class="info-label"><i class="fas fa-university"></i> Agência Fomento</div>
+                                                <div class="info-value">
+                                                    <?php echo htmlspecialchars($proj['agencia_financiadora']); ?>
+                                                </div>
+                                            </div>
                                 <?php endif; ?>
 
                                 <?php if (!empty($proj['financiamento']) && $proj['financiamento'] > 0): ?>
-                                    <div class="info-item">
-                                        <div class="info-label"><i class="fas fa-money-bill-wave"></i> Valor</div>
-                                        <div class="info-value destaque-valor">
-                                            R$ <?php echo number_format($proj['financiamento'], 2, ',', '.'); ?>
-                                        </div>
-                                    </div>
+                                            <div class="info-item">
+                                                <div class="info-label"><i class="fas fa-money-bill-wave"></i> Valor</div>
+                                                <div class="info-value destaque-valor">
+                                                    R$ <?php echo number_format($proj['financiamento'], 2, ',', '.'); ?>
+                                                </div>
+                                            </div>
                                 <?php endif; ?>
 
                                 <?php if (!empty($proj['links'])): ?>
-                                    <div class="info-item border-0">
-                                        <div class="info-label"><i class="fas fa-link"></i> Links Relacionados</div>
-                                        <div class="links-list mt-2">
-                                            <?php
-                                            // Expressão Regular (Regex) divide a string por quebra de linha ou vírgula
-                                            $links = preg_split('/[\n,]+/', $proj['links']);
-                                            foreach ($links as $link):
-                                                $link = trim($link); // Remove espaços em branco extras
-                                                if (!empty($link)):
-                                                    ?>
-                                                    <a href="<?php echo $link; ?>" target="_blank" class="btn-link-externo">
-                                                        <i class="fas fa-external-link-alt"></i> Acessar Recurso
-                                                    </a>
-                                                <?php endif; endforeach; ?>
-                                        </div>
-                                    </div>
+                                            <div class="info-item border-0">
+                                                <div class="info-label"><i class="fas fa-link"></i> Links Relacionados</div>
+                                                <div class="links-list mt-2">
+                                                    <?php
+                                                    // Expressão Regular (Regex) divide a string por quebra de linha ou vírgula
+                                                    $links = preg_split('/[\n,]+/', $proj['links']);
+                                                    foreach ($links as $link):
+                                                        $link = trim($link); // Remove espaços em branco extras
+                                                        if (!empty($link)):
+                                                            ?>
+                                                                            <a href="<?php echo $link; ?>" target="_blank" class="btn-link-externo">
+                                                                                <i class="fas fa-external-link-alt"></i> Acessar Recurso
+                                                                            </a>
+                                                                <?php endif; endforeach; ?>
+                                                </div>
+                                            </div>
                                 <?php endif; ?>
 
                             </div>

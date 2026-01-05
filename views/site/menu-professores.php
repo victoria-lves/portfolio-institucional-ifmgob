@@ -1,7 +1,7 @@
 <?php
 // 1. Configuração e Conexão
 // Importa as credenciais e instancia a conexão segura via PDO
-require_once 'config/database.php';
+require_once '../../config/database.php';
 $database = new Database();
 $conn = $database->getConnection();
 
@@ -14,7 +14,7 @@ $prof = null;
 // 3. Controlador Lógico
 if ($id_professor) {
     // MODO PERFIL: Exibe detalhes de um único professor
-    
+
     // Busca os dados cadastrais do professor
     $query = "SELECT * FROM professor WHERE id = :id LIMIT 1";
     $stmt = $conn->prepare($query);
@@ -61,41 +61,44 @@ if ($id_professor) {
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="keywords" content="corpo docente IFMG Ouro Branco, professores campus Ouro Branco, qualificação professores IFMG, coordenadores cursos IFMG, lista de professores IFMG">
+    <meta name="keywords"
+        content="corpo docente IFMG Ouro Branco, professores campus Ouro Branco, qualificação professores IFMG, coordenadores cursos IFMG, lista de professores IFMG">
     <title>
         <?php echo ($view === 'perfil' && $prof) ? 'Perfil - ' . htmlspecialchars($prof['nome']) : 'Nossos Docentes'; ?>
         | IFMG
     </title>
 
-    <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@700&family=Poppins:wght@300;400;600&display=swap"
+        rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
 
     <?php if ($view === 'perfil'): ?>
-        <link rel="stylesheet" href="css/style-pagina-docente.css">
+        <link rel="stylesheet" href="../../assets/css/style-pagina-professores.css">
     <?php else: ?>
-        <link rel="stylesheet" href="css/style-menu-docentes.css" />
+        <link rel="stylesheet" href="../../assets/css/style-menu-professores.css" />
     <?php endif; ?>
 </head>
 
 <body>
     <header>
-      <div class="container header-content">
-        <a href="menu-principal.php" id="logo-link" aria-label="Voltar para a página inicial">
-          <img src="img/logo-branco.png" alt="Logo do IFMG Campus Ouro Branco" id="logo" />
-        </a>
+        <div class="container header-content">
+            <a href="menu-principal.php" id="logo-link" aria-label="Voltar para a página inicial">
+                <img src="../../assets/img/logo-branco.png" alt="Logo do IFMG Campus Ouro Branco" id="logo" />
+            </a>
 
-        <button class="menu-toggle" aria-label="Abrir menu de navegação">
-          <i class="fa-solid fa-bars"></i>
-        </button>
+            <button class="menu-toggle" aria-label="Abrir menu de navegação">
+                <i class="fa-solid fa-bars"></i>
+            </button>
 
-        <nav class="nav-items">
-          <a href="menu-cursos.php">Cursos</a>
-          <a href="menu-laboratorios.html">Laboratórios</a>
-          <a href="menu-docentes.php" class="active">Docentes</a>
-          <a href="menu-projetos.php">Projetos</a>
-          <a href="views/auth/login.php" class="btn-login">Acesso Restrito</a>
-        </nav>
-      </div>
+            <nav class="nav-items">
+                <a href="menu-cursos.php">Cursos</a>
+                <a href="menu-laboratorios.html">Laboratórios</a>
+                <a href="menu-professores.php" class="active">Docentes</a>
+                <a href="menu-projetos.php">Projetos</a>
+                <a href="../auth/login.php" class="btn-login">Acesso Restrito</a>
+            </nav>
+        </div>
     </header>
 
     <main>
@@ -104,8 +107,8 @@ if ($id_professor) {
                 <?php
                 // Lógica de Prioridade da Foto de Perfil
                 $pfpName = $prof['pfp'] ?? '';
-                $localPath = 'img/docentes/' . $pfpName;
-                $defaultImg = 'img/docentes/default-pfp.webp';
+                $localPath = '../../assets/img/docentes/' . $pfpName;
+                $defaultImg = '../../assets/img/docentes/default-img-pfp.webp';
 
                 // Decide qual imagem mostrar: Link Externo > Arquivo Local > Imagem Padrão
                 if (empty($pfpName)) {
@@ -118,7 +121,7 @@ if ($id_professor) {
                     $src = $defaultImg; // Fallback
                 }
                 ?>
-                
+
                 <div class="profile-header-wrapper">
                     <img src="<?php echo $src; ?>" alt="<?php echo htmlspecialchars($prof['nome']); ?>" class="profile-img">
                     <h1 class="profile-name"><?php echo htmlspecialchars($prof['nome']); ?></h1>
@@ -127,7 +130,7 @@ if ($id_professor) {
 
             <section class="conteudo-section">
                 <div class="container">
-                    <a href="menu-docentes.php" class="btn-voltar">
+                    <a href="menu-professores.php" class="btn-voltar">
                         <i class="fa-solid fa-arrow-left"></i> Voltar para Docentes
                     </a>
 
@@ -164,9 +167,11 @@ if ($id_professor) {
                                                 <li>
                                                     <div class="doc-item">
                                                         <span class="doc-type"><?php echo htmlspecialchars($prod['tipo']); ?></span>
-                                                        <span class="doc-title"><?php echo htmlspecialchars($prod['titulo']); ?></span>
+                                                        <span
+                                                            class="doc-title"><?php echo htmlspecialchars($prod['titulo']); ?></span>
                                                         <?php if ($prod['link']): ?>
-                                                            <a href="pagina-producao.php?id=<?php echo $prod['id']; ?>" target="_blank" class="doc-link">
+                                                            <a href="pagina-producao.php?id=<?php echo $prod['id']; ?>" target="_blank"
+                                                                class="doc-link">
                                                                 Ver detalhes <i class="fa-solid fa-external-link-alt"></i>
                                                             </a>
                                                         <?php endif; ?>
@@ -189,7 +194,8 @@ if ($id_professor) {
                                         <div class="grid-projetos-mini">
                                             <?php foreach ($projetos as $proj): ?>
                                                 <div class="projeto-mini-card">
-                                                    <div class="proj-status <?php echo strtolower(str_replace(' ', '-', $proj['status'])); ?>">
+                                                    <div
+                                                        class="proj-status <?php echo strtolower(str_replace(' ', '-', $proj['status'])); ?>">
                                                         <?php echo htmlspecialchars($proj['status']); ?>
                                                     </div>
                                                     <h4><?php echo htmlspecialchars($proj['titulo']); ?></h4>
@@ -214,7 +220,8 @@ if ($id_professor) {
                                             <i class="fa-solid fa-at"></i>
                                             <span><?php echo htmlspecialchars($prof['email']); ?></span>
                                         </div>
-                                        <a href="mailto:<?php echo htmlspecialchars($prof['email']); ?>" class="btn-primary-full">Enviar E-mail</a>
+                                        <a href="mailto:<?php echo htmlspecialchars($prof['email']); ?>"
+                                            class="btn-primary-full">Enviar E-mail</a>
                                     <?php endif; ?>
                                 </div>
                             </div>
@@ -225,14 +232,16 @@ if ($id_professor) {
                                     <ul class="info-list">
                                         <?php if (!empty($prof['lattes'])): ?>
                                             <li>
-                                                <a href="<?php echo htmlspecialchars($prof['lattes']); ?>" target="_blank" class="external-link">
+                                                <a href="<?php echo htmlspecialchars($prof['lattes']); ?>" target="_blank"
+                                                    class="external-link">
                                                     <i class="fa-solid fa-file-contract"></i> Currículo Lattes
                                                 </a>
                                             </li>
                                         <?php endif; ?>
                                         <?php if (!empty($prof['linkedin'])): ?>
                                             <li>
-                                                <a href="<?php echo htmlspecialchars($prof['linkedin']); ?>" target="_blank" class="external-link">
+                                                <a href="<?php echo htmlspecialchars($prof['linkedin']); ?>" target="_blank"
+                                                    class="external-link">
                                                     <i class="fa-brands fa-linkedin"></i> LinkedIn
                                                 </a>
                                             </li>
@@ -271,7 +280,7 @@ if ($id_professor) {
                     <i class="fa-solid fa-user-slash icon-error"></i>
                     <h2>Professor não encontrado</h2>
                     <p>O professor solicitado não foi localizado.</p>
-                    <a href="menu-docentes.php" class="btn-voltar">Voltar para Lista</a>
+                    <a href="menu-professores.php" class="btn-voltar">Voltar para Lista</a>
                 </div>
             </section>
 
@@ -323,11 +332,11 @@ if ($id_professor) {
                         // Verifica se há docentes cadastrados
                         if ($stmt_lista && $stmt_lista->rowCount() > 0) {
                             while ($row = $stmt_lista->fetch(PDO::FETCH_ASSOC)) {
-                                
+
                                 // Processamento da Imagem para o Card (Mesma lógica do perfil)
                                 $nome_arquivo = $row['pfp'];
-                                $caminho_local = 'img/docentes/' . $nome_arquivo;
-                                $img_padrao = 'img/docentes/default-pfp.webp';
+                                $caminho_local = '../../assets/img/docentes/' . $nome_arquivo;
+                                $img_padrao = '../../assets/img/docentes/default-img-pfp.webp';
 
                                 if (empty($nome_arquivo)) {
                                     $img = $img_padrao;
@@ -380,35 +389,36 @@ if ($id_professor) {
     </main>
 
     <footer>
-      <div class="container">
-        <div class="footer-content">
-          <div class="footer-section">
-            <h4>Endereço</h4>
-            <p><i class="fa-solid fa-location-dot"></i> Rua Afonso Sardinha, 90<br />Ouro Branco, MG - 36420-000</p>
-          </div>
-          <div class="footer-section">
-            <h4>Funcionamento</h4>
-            <p><i class="fa-regular fa-clock"></i> Seg a Sex: 08h - 22h</p>
-            <p>Sábado: 12h - 20h</p>
-          </div>
-          <div class="footer-section">
-            <h4>Contato</h4>
-            <p><i class="fa-regular fa-envelope"></i> secretaria.ourobranco@ifmg.edu.br</p>
-            <p><i class="fa-solid fa-phone"></i> (31) 2137-5700</p>
-          </div>
-          <div class="footer-section">
-            <h4>Redes Sociais</h4>
-            <div class="social-icons">
-              <a href="#" aria-label="Youtube"><i class="fa-brands fa-youtube"></i></a>
-              <a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
-              <a href="#" aria-label="Facebook"><i class="fa-brands fa-facebook"></i></a>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Endereço</h4>
+                    <p><i class="fa-solid fa-location-dot"></i> Rua Afonso Sardinha, 90<br />Ouro Branco, MG - 36420-000
+                    </p>
+                </div>
+                <div class="footer-section">
+                    <h4>Funcionamento</h4>
+                    <p><i class="fa-regular fa-clock"></i> Seg a Sex: 08h - 22h</p>
+                    <p>Sábado: 12h - 20h</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Contato</h4>
+                    <p><i class="fa-regular fa-envelope"></i> secretaria.ourobranco@ifmg.edu.br</p>
+                    <p><i class="fa-solid fa-phone"></i> (31) 2137-5700</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Redes Sociais</h4>
+                    <div class="social-icons">
+                        <a href="#" aria-label="Youtube"><i class="fa-brands fa-youtube"></i></a>
+                        <a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+                        <a href="#" aria-label="Facebook"><i class="fa-brands fa-facebook"></i></a>
+                    </div>
+                </div>
             </div>
-          </div>
+            <div class="copyright">
+                <p>&copy; 2025 Instituto Federal de Minas Gerais - Campus Ouro Branco</p>
+            </div>
         </div>
-        <div class="copyright">
-          <p>&copy; 2025 Instituto Federal de Minas Gerais - Campus Ouro Branco</p>
-        </div>
-      </div>
     </footer>
 
     <script>
@@ -433,7 +443,7 @@ if ($id_professor) {
                     function filtrarDocentes() {
                         // Normaliza texto da busca (minúsculo e sem acentos)
                         const searchTerm = searchInput.value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-                        
+
                         // Cria lista de áreas selecionadas
                         const selectedGabinetes = Array.from(gabineteCheckboxes)
                             .filter(cb => cb.checked)
@@ -468,7 +478,7 @@ if ($id_professor) {
                     // Listeners de eventos
                     searchInput.addEventListener('input', filtrarDocentes);
                     gabineteCheckboxes.forEach(checkbox => checkbox.addEventListener('change', filtrarDocentes));
-                    
+
                     // Botão de reset
                     btnLimpar.addEventListener('click', function () {
                         searchInput.value = '';

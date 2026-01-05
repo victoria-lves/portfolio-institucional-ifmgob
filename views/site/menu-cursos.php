@@ -1,6 +1,6 @@
 <?php
 // 1. Incluir a configuração do banco (caminho relativo à raiz)
-require_once 'config/database.php';
+require_once '../../config/database.php';
 
 // 2. Instanciar a conexão PDO
 $database = new Database();
@@ -24,7 +24,7 @@ try {
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Nossos Cursos | IFMG</title>
 
-    <link rel="stylesheet" href="css/style-menu-cursos.css" />
+    <link rel="stylesheet" href="../../assets/css/style-menu-cursos.css" />
 
     <link
         href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@700&family=Poppins:wght@300;400;600&display=swap"
@@ -37,7 +37,7 @@ try {
     <header>
         <div class="container header-content">
             <a href="menu-principal.php" id="logo-link" aria-label="Voltar para a página inicial">
-                <img src="img/logo-branco.png" alt="Logo do IFMG" id="logo" />
+                <img src="../../assets/img/logo-branco.png" alt="Logo do IFMG" id="logo" />
             </a>
 
             <button class="menu-toggle" aria-label="Abrir menu">
@@ -47,9 +47,9 @@ try {
             <nav class="nav-items">
                 <a href="menu-cursos.php" class="active">Cursos</a>
                 <a href="menu-laboratorios.html">Laboratórios</a>
-                <a href="menu-docentes.php">Docentes</a>
+                <a href="menu-professores.php">Docentes</a>
                 <a href="menu-projetos.php">Projetos</a>
-                <a href="views/auth/login.php" class="btn-login">Acesso Restrito</a>
+                <a href="../auth/login.php" class="btn-login">Acesso Restrito</a>
             </nav>
         </div>
     </header>
@@ -80,7 +80,7 @@ try {
                             if (empty($nome_arquivo)) {
                                 // CASO 1: Campo vazio -> Usa imagem padrão
                                 // Certifique-se de ter essa imagem na pasta ou ajuste o nome aqui
-                                $img = 'img/default-curso.webp';
+                                $img = '../../assets/img/default-img-curso.webp';
                             } elseif (strpos($nome_arquivo, 'http') === 0) {
                                 // CASO 2: É um link externo (começa com http/https)
                                 $img = htmlspecialchars($nome_arquivo);

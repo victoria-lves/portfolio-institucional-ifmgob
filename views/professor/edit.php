@@ -20,18 +20,18 @@ if (!$id_professor && $_SESSION['usuario_nivel'] == 'professor') {
 
 if (!$id_professor) {
     $_SESSION['erro'] = "Professor não identificado.";
-    header("Location: ../painel.php");
+    header("Location: ../sistema/painel.php");
     exit();
 }
 
 // Verifica permissão: Só o próprio professor ou Admin podem editar
 if ($_SESSION['usuario_nivel'] != 'admin' && $_SESSION['professor_id'] != $id_professor) {
     $_SESSION['erro'] = "Você não tem permissão para editar este perfil.";
-    header("Location: ../painel.php");
+    header("Location: ../sistema/painel.php");
     exit();
 }
 
-require_once '../../config/database.php';
+require_once '../../../config/database.php';
 $database = new Database();
 $db = $database->getConnection();
 
@@ -152,7 +152,7 @@ if (!$prof) {
     <div class="container py-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2><i class="bi bi-person-lines-fill text-primary"></i> Editar Perfil</h2>
-            <a href="../painel.php" class="btn btn-secondary">Painel</a>
+            <a href="../sistema/painel.php" class="btn btn-secondary">Painel</a>
         </div>
 
         <?php if (isset($_SESSION['sucesso'])): ?>
@@ -177,7 +177,7 @@ if (!$prof) {
                     <div class="form-card text-center h-100">
                         <div class="mb-3">
                             <?php
-                            $imgSrc = !empty($prof['pfp']) ? "../../img/docentes/" . $prof['pfp'] : "../../img/docentes/default-pfp.webp";
+                            $imgSrc = !empty($prof['pfp']) ? "../../assets/img/docentes/" . $prof['pfp'] : "../../assets/img/docentes/default-img-pfp.webp";
                             // Verifica se é link externo ou arquivo local
                             if (strpos($prof['pfp'] ?? '', 'http') === 0)
                                 $imgSrc = $prof['pfp'];

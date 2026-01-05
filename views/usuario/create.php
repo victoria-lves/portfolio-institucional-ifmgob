@@ -11,7 +11,7 @@ if (!isset($_SESSION['usuario_id'])) {
 // Apenas Admin ou Professor podem acessar
 if ($_SESSION['usuario_nivel'] != 'admin' && $_SESSION['usuario_nivel'] != 'professor') {
     $_SESSION['erro'] = "Acesso não autorizado!";
-    header("Location: ../painel.php");
+    header("Location: ../sistema/painel.php");
     exit();
 }
 
@@ -22,7 +22,7 @@ if ($_SESSION['usuario_nivel'] == 'professor' && !isset($_SESSION['professor_id'
     exit();
 }
 
-require_once '../../config/database.php';
+require_once '../../../config/database.php';
 require_once '../../models/Professor.php';
 
 $database = new Database();

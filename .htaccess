@@ -1,26 +1,17 @@
 RewriteEngine On
-
-# Se o projeto estiver numa subpasta (ex: localhost/sistema-crud), define a base aqui
-# Se estiveres na raiz (ex: site.com), podes remover esta linha
 RewriteBase /sistema-crud/
 
-# Não aplica regras se o arquivo ou diretório real existir (para CSS, JS, Imagens funcionarem)
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 
-# --- REGRA 1: Projetos ---
-# Transforma: site.com/projeto/123 -> pagina-projeto.php?id=123
-RewriteRule ^projeto/([0-9]+)$ pagina-projeto.php?id=$1 [L,QSA]
+# Projetos
+RewriteRule ^projeto/([0-9]+)$ views/site/pagina-projeto.php?id=$1 [L,QSA]
 
-# --- REGRA 2: Cursos ---
-# Transforma: site.com/curso/5 -> pagina-curso.php?id=5
-RewriteRule ^curso/([0-9]+)$ pagina-curso.php?id=$1 [L,QSA]
+# Cursos
+RewriteRule ^curso/([0-9]+)$ views/site/pagina-curso.php?id=$1 [L,QSA]
 
-# --- REGRA 3: Professores ---
-# Transforma: site.com/professor/8 -> public/professor.php?id=8
-# Nota: Aqui apontei para a pasta 'public/' onde está o teu arquivo
-RewriteRule ^professor/([0-9]+)$ public/professor.php?id=$1 [L,QSA]
+# Produções
+RewriteRule ^producao/([0-9]+)$ views/site/pagina-producao.php?id=$1 [L,QSA]
 
-# --- REGRA 4: Produções ---
-# Transforma: site.com/producao/20 -> pagina-producao.php?id=20
-RewriteRule ^producao/([0-9]+)$ pagina-producao.php?id=$1 [L,QSA]
+#Professor
+RewriteRule ^professor/([0-9]+)$ views/site/pagina-professores.php?id=$1 [L,QSA]

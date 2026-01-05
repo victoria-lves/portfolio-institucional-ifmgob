@@ -1,6 +1,6 @@
 <?php
 // Carrega as configurações de conexão com o banco de dados
-require_once 'config/database.php';
+require_once '../../config/database.php';
 
 // 1. Verificar ID
 // Verifica se o ID foi passado na URL. Se sim, converte para inteiro (segurança), senão define como null
@@ -9,7 +9,7 @@ $id_producao = isset($_GET['id']) ? (int) $_GET['id'] : null;
 // Se o ID não for válido (nulo ou zero), o script redireciona o usuário
 if (!$id_producao) {
     // Envia um cabeçalho HTTP instruindo o navegador a ir para a lista de docentes
-    header("Location: menu-docentes.php");
+    header("Location: menu-professores.php");
     // Interrompe imediatamente a execução do script para garantir o redirecionamento
     exit;
 }
@@ -57,14 +57,14 @@ if (!$prod) {
         rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
 
-    <link rel="stylesheet" href="css/style-pagina-producao.css">
+    <link rel="stylesheet" href="../../assets/css/style-pagina-producao.css">
 </head>
 
 <body>
     <header>
         <div class="container header-content">
             <a href="menu-principal.php" id="logo-link" aria-label="Voltar para a página inicial">
-                <img src="img/logo-branco.png" alt="Logo do IFMG Campus Ouro Branco" id="logo" />
+                <img src="../../assets/img/logo-branco.png" alt="Logo do IFMG Campus Ouro Branco" id="logo" />
             </a>
 
             <button class="menu-toggle" aria-label="Abrir menu de navegação">
@@ -74,9 +74,9 @@ if (!$prod) {
             <nav class="nav-items">
                 <a href="menu-cursos.php">Cursos</a>
                 <a href="menu-laboratorios.html" class="active">Laboratórios</a>
-                <a href="menu-docentes.php">Docentes</a>
+                <a href="menu-professores.php">Docentes</a>
                 <a href="menu-projetos.php">Projetos</a>
-                <a href="views/auth/login.php" class="btn-login">Acesso Restrito</a>
+                <a href="../auth/login.php" class="btn-login">Acesso Restrito</a>
             </nav>
         </div>
     </header>
@@ -91,7 +91,7 @@ if (!$prod) {
 
         <section class="conteudo-section">
             <div class="container">
-                <a href="menu-docentes.php?id=<?php echo $prod['id_autor_sistema']; ?>" class="btn-voltar">
+                <a href="menu-professores.php?id=<?php echo $prod['id_autor_sistema']; ?>" class="btn-voltar">
                     <i class="fa-solid fa-arrow-left"></i> Voltar ao Perfil
                 </a>
 

@@ -9,7 +9,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // 2. Correção dos Caminhos: Usa __DIR__ para garantir o caminho correto independente de onde é chamado
-require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../models/Professor.php';
 
 class ProfessorController
@@ -26,7 +26,7 @@ class ProfessorController
         $this->professor = new Professor($this->db);
 
         // Define o diretório de upload relativo à localização deste arquivo de controller
-        $this->uploadDir = __DIR__ . '/../img/docentes/';
+        $this->uploadDir = __DIR__ . '/../assets/img/docentes/';
     }
 
     // ==========================================================
@@ -67,7 +67,7 @@ class ProfessorController
                         // Atualiza sessão se for o próprio professor
                         $_SESSION['professor_id'] = $this->db->lastInsertId();
                         $_SESSION['sucesso'] = "Perfil criado com sucesso!";
-                        header("Location: ../views/painel.php");
+                        header("Location: ../views/sistema/painel.php");
                     } else {
                         $_SESSION['sucesso'] = "Professor cadastrado com sucesso!";
                         header("Location: ../views/professor/edit.php");
@@ -151,7 +151,7 @@ class ProfessorController
     {
         if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_nivel'] != 'admin') {
             $_SESSION['erro'] = "Acesso negado.";
-            header("Location: ../views/painel.php");
+            header("Location: ../views/sistema/painel.php");
             exit();
         }
 

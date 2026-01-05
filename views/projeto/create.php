@@ -14,7 +14,7 @@ if (!isset($_SESSION['usuario_id'])) {
 // Apenas Admin ou Professor podem acessar
 if ($_SESSION['usuario_nivel'] != 'admin' && $_SESSION['usuario_nivel'] != 'professor') {
     $_SESSION['erro'] = "Acesso não autorizado!";
-    header("Location: ../painel.php");
+    header("Location: ../sistema/painel.php");
     exit();
 }
 
@@ -25,7 +25,7 @@ if ($_SESSION['usuario_nivel'] == 'professor' && !isset($_SESSION['professor_id'
     exit();
 }
 
-require_once '../../config/database.php';
+require_once '../../../config/database.php';
 require_once '../../models/Professor.php';
 
 $database = new Database();
@@ -134,17 +134,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // ETAPA 3: SALVAR A IMAGEM (COM REDIMENSIONAMENTO)
         if (isset($_FILES['imagem']) && $_FILES['imagem']['error'] === UPLOAD_ERR_OK) {
-            
+
             // Incluir a classe de redimensionamento
             require_once '../../utils/ImageHandler.php';
 
             // 1. Validação de Segurança (MIME Type) - Já tínhamos falado disso!
             $finfo = new finfo(FILEINFO_MIME_TYPE);
             $mime = $finfo->file($_FILES['imagem']['tmp_name']);
-            
+
             $permitidos = [
                 'image/jpeg' => 'jpg',
-                'image/png'  => 'png',
+                'image/png' => 'png',
                 'image/webp' => 'webp'
             ];
 
@@ -154,14 +154,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     mkdir($diretorio_upload, 0777, true);
 
                 // Define o nome e a extensão (pode forçar .webp se quiser modernizar)
-                $extensao = $permitidos[$mime]; 
+                $extensao = $permitidos[$mime];
                 $novo_nome = uniqid('proj_') . '.' . $extensao;
 
                 // --- AQUI ACONTECE A MÁGICA ---
                 // Em vez de move_uploaded_file, chamamos nosso Helper
                 // Definimos largura máxima de 1024px
                 if (ImageHandler::resizeAndSave($_FILES['imagem'], $diretorio_upload, $novo_nome, 1024)) {
-                    
+
                     $sql_img = "INSERT INTO imagens (caminho, id_projeto, legenda) VALUES (:caminho, :id_projeto, :legenda)";
                     $stmt_img = $db->prepare($sql_img);
                     $stmt_img->execute([

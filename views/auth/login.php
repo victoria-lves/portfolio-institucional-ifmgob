@@ -4,7 +4,7 @@ session_start();
 
 // Se já estiver logado, redireciona para o painel
 if (isset($_SESSION['usuario_id'])) {
-    header("Location: ../painel.php");
+    header("Location: ../sistema/painel.php");
     exit();
 }
 
@@ -35,7 +35,8 @@ if (isset($_SESSION['old_email'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="keywords" content="acesso professores IFMG Ouro Branco, atualizar descrição IFMG, sistema professores campus Ouro Branco, portal docente IFMG, login sistema acadêmico">
+    <meta name="keywords"
+        content="acesso professores IFMG Ouro Branco, atualizar descrição IFMG, sistema professores campus Ouro Branco, portal docente IFMG, login sistema acadêmico">
     <title>Login - IFMG Ouro Branco</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -55,11 +56,20 @@ if (isset($_SESSION['old_email'])) {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
-        .login-container { animation: fadeIn 0.5s ease-out; }
+        .login-container {
+            animation: fadeIn 0.5s ease-out;
+        }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .login-card {
@@ -76,8 +86,14 @@ if (isset($_SESSION['old_email'])) {
             text-align: center;
         }
 
-        .login-header h2 { margin: 0; font-weight: 700; }
-        .login-body { padding: 40px; }
+        .login-header h2 {
+            margin: 0;
+            font-weight: 700;
+        }
+
+        .login-body {
+            padding: 40px;
+        }
 
         .form-control {
             padding: 12px 15px;
@@ -107,7 +123,10 @@ if (isset($_SESSION['old_email'])) {
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
 
-        .password-toggle { cursor: pointer; color: #666; }
+        .password-toggle {
+            cursor: pointer;
+            color: #666;
+        }
     </style>
 </head>
 
@@ -122,7 +141,7 @@ if (isset($_SESSION['old_email'])) {
                     </div>
 
                     <div class="login-body">
-                        
+
                         <?php if ($sucesso): ?>
                             <div class="alert alert-success alert-dismissible fade show" role="alert">
                                 <i class="bi bi-check-circle-fill me-2"></i>
@@ -140,7 +159,7 @@ if (isset($_SESSION['old_email'])) {
                         <?php endif; ?>
 
                         <form action="../../controllers/AuthController.php?action=login" method="POST" id="loginForm">
-                            
+
                             <div class="mb-4">
                                 <label for="email" class="form-label fw-bold">
                                     <i class="bi bi-envelope me-1"></i> Email Institucional
@@ -215,7 +234,7 @@ if (isset($_SESSION['old_email'])) {
         document.getElementById('loginForm').addEventListener('submit', function (e) {
             const submitBtn = this.querySelector('button[type="submit"]');
             const originalText = submitBtn.innerHTML;
-            
+
             submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Entrando...';
             submitBtn.disabled = true;
 
@@ -227,4 +246,5 @@ if (isset($_SESSION['old_email'])) {
         });
     </script>
 </body>
+
 </html>
