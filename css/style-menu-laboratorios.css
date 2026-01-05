@@ -1,0 +1,258 @@
+/* --- VARIÁVEIS E RESET --- */
+:root {
+  --primary-color: #006400; /* Verde IFMG */
+  --primary-dark: #004d00;
+  --accent-color: #ffd700;  /* Amarelo */
+  --text-dark: #333333;
+  --text-light: #f4f4f9;
+  --card-bg: #ffffff;
+  --bg-color: #f8f9fa;
+  --shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  --transition: all 0.3s ease;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Poppins', sans-serif;
+  color: var(--text-dark);
+  background-color: var(--bg-color);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  line-height: 1.6;
+}
+
+main { flex-grow: 1; }
+a { text-decoration: none; color: inherit; transition: var(--transition); }
+ul { list-style: none; }
+
+.container { width: 90%; max-width: 1200px; margin: 0 auto; }
+
+/* --- HEADER --- */
+header {
+  background-color: var(--primary-color);
+  padding: 15px 0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+
+.header-content { display: flex; justify-content: space-between; align-items: center; }
+#logo { height: 45px; width: auto; filter: brightness(0) invert(1); }
+
+.menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.nav-items { display: flex; gap: 25px; align-items: center; }
+
+.nav-items a {
+  color: rgba(255,255,255,0.9);
+  font-weight: 500;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  position: relative;
+}
+
+.nav-items a:hover, .nav-items a.active { color: var(--accent-color); }
+
+.nav-items a::after {
+  content: ''; position: absolute; width: 0; height: 2px;
+  bottom: -4px; left: 0; background-color: var(--accent-color);
+  transition: width 0.3s;
+}
+.nav-items a:hover::after { width: 100%; }
+
+.btn-login {
+  border: 1px solid rgba(255,255,255,0.3);
+  padding: 6px 18px; border-radius: 20px;
+}
+.btn-login:hover { background: white; color: var(--primary-color) !important; }
+.btn-login::after { display: none; }
+
+/* --- HERO SECTION --- */
+.theme {
+  position: relative;
+  height: 300px;
+  background-image: url('../img/sci.jpg'); /* Imagem de fundo padrão */
+  background-size: cover;
+  background-position: center;
+  display: flex; align-items: center; justify-content: center;
+  text-align: center; color: white;
+}
+
+.theme-overlay {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0, 50, 0, 0.7);
+}
+
+.theme-content { position: relative; z-index: 2; padding: 0 20px; }
+
+.theme-title {
+  font-family: 'League Spartan', sans-serif;
+  font-size: 3.5rem;
+  font-weight: 900; margin-bottom: 10px; text-transform: uppercase;
+  text-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+}
+
+.theme-desc { font-size: 1.2rem; font-weight: 300; max-width: 700px; margin: 0 auto; opacity: 0.9; }
+
+/* --- FILTRO SECTION --- */
+.filtro-section { margin-top: -30px; position: relative; z-index: 10; margin-bottom: 40px; }
+
+.filtro-box {
+  background: white;
+  padding: 25px 40px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  flex-wrap: wrap;
+}
+
+.filtro-header {
+  display: flex; align-items: center; gap: 10px;
+  border-right: 1px solid #eee; padding-right: 30px;
+}
+
+.filtro-header h2 {
+  font-family: 'League Spartan', sans-serif;
+  font-size: 1.3rem; color: var(--primary-color);
+}
+
+.filtro-header i { font-size: 1.2rem; color: var(--accent-color); }
+
+.filtro-form { display: flex; flex-grow: 1; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; }
+.filtro-opcoes { display: flex; gap: 20px; flex-wrap: wrap; }
+
+.checkbox-container {
+  display: flex; align-items: center; gap: 8px;
+  cursor: pointer; font-size: 0.95rem; font-weight: 500;
+  user-select: none;
+}
+
+.checkbox-container input {
+  accent-color: var(--primary-color);
+  width: 18px; height: 18px; cursor: pointer;
+}
+
+.btn-filtrar {
+  background-color: var(--primary-color);
+  color: white; border: none; padding: 10px 25px;
+  border-radius: 6px; cursor: pointer; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.5px;
+  transition: var(--transition);
+}
+
+.btn-filtrar:hover { background-color: var(--primary-dark); transform: translateY(-2px); }
+
+/* --- GRID DE LABORATÓRIOS --- */
+.labs-section { padding-bottom: 60px; }
+
+.galeria-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 30px;
+}
+
+.lab-card {
+  background: var(--card-bg);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  transition: var(--transition);
+  display: flex; flex-direction: column;
+  border: 1px solid #eee;
+}
+
+.lab-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+}
+
+.card-image { position: relative; height: 200px; overflow: hidden; }
+
+.card-image img {
+  width: 100%; height: 100%; object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.lab-card:hover .card-image img { transform: scale(1.1); }
+
+/* Badges Coloridas */
+.card-badge {
+  position: absolute; top: 15px; right: 15px;
+  background-color: var(--primary-color); /* Default */
+  color: white; padding: 5px 12px;
+  border-radius: 20px; font-size: 0.75rem; font-weight: 700;
+  text-transform: uppercase; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.card-badge.metalurgia { background-color: #d35400; }
+.card-badge.ciencias { background-color: #2980b9; }
+.card-badge.pesquisa { background-color: #8e44ad; }
+
+.card-content {
+  padding: 25px; display: flex; flex-direction: column; flex-grow: 1;
+}
+
+.card-title {
+  font-family: 'League Spartan', sans-serif;
+  font-size: 1.3rem; color: var(--primary-color);
+  margin-bottom: 10px; line-height: 1.3;
+}
+
+.card-title a:hover { text-decoration: underline; }
+
+.card-info { font-size: 0.9rem; color: #666; margin-bottom: 20px; }
+.card-info i { color: var(--accent-color); margin-right: 5px; }
+
+.btn-detalhes {
+  display: inline-flex; align-items: center; gap: 8px;
+  color: var(--primary-color); font-weight: 600; font-size: 0.9rem;
+  margin-top: auto;
+}
+.btn-detalhes:hover { gap: 12px; color: var(--primary-dark); }
+
+/* --- FOOTER --- */
+footer { background-color: var(--primary-color); color: white; padding-top: 60px; margin-top: auto; }
+.footer-content { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 40px; padding-bottom: 40px; }
+.footer-section h4 { font-family: 'League Spartan', sans-serif; font-size: 1.2rem; color: var(--accent-color); margin-bottom: 20px; position: relative; padding-bottom: 10px; }
+.footer-section h4::after { content: ''; position: absolute; bottom: 0; left: 0; width: 40px; height: 3px; background-color: var(--accent-color); }
+.footer-section p { font-size: 0.9rem; margin-bottom: 10px; display: flex; gap: 10px; align-items: center; opacity: 0.9; }
+.social-icons { display: flex; gap: 15px; }
+.social-icons a { width: 35px; height: 35px; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: var(--transition); }
+.social-icons a:hover { background: var(--accent-color); color: var(--primary-color); transform: translateY(-3px); }
+.copyright { text-align: center; padding: 20px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 0.85rem; opacity: 0.8; }
+
+/* --- RESPONSIVIDADE --- */
+@media (max-width: 768px) {
+  .header-content { flex-wrap: wrap; }
+  .menu-toggle { display: block; }
+  
+  .nav-items {
+    display: none; width: 100%; flex-direction: column;
+    padding-top: 20px; gap: 15px; text-align: center;
+  }
+  .nav-items.active { display: flex; }
+  
+  .theme-title { font-size: 2.5rem; }
+  .filtro-box { flex-direction: column; align-items: stretch; text-align: center; }
+  .filtro-header { border-right: none; border-bottom: 1px solid #eee; padding-right: 0; padding-bottom: 15px; justify-content: center; }
+  .filtro-form { flex-direction: column; gap: 15px; }
+  .filtro-opcoes { justify-content: center; }
+  .btn-filtrar { width: 100%; }
+  
+  .footer-content { text-align: center; }
+  .footer-section h4::after { left: 50%; transform: translateX(-50%); }
+  .footer-section p { justify-content: center; }
+  .social-icons { justify-content: center; }
+}

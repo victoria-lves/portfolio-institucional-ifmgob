@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nossos Laboratórios | IFMG</title>
+
+    <link rel="stylesheet" href="css/style-menu-laboratorios.css" />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@700&family=Poppins:wght@300;400;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+    />
+  </head>
+
+  <body>
+    <header>
+      <div class="container header-content">
+        <a
+          href="menu-principal.php"
+          id="logo-link"
+          aria-label="Voltar para a página inicial"
+        >
+          <img
+            src="img/logo-branco.png"
+            alt="Logo do IFMG Campus Ouro Branco"
+            id="logo"
+          />
+        </a>
+
+        <button class="menu-toggle" aria-label="Abrir menu de navegação">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+
+        <nav class="nav-items">
+          <a href="menu-cursos.php">Cursos</a>
+          <a href="menu-laboratorios.html" class="active">Laboratórios</a>
+          <a href="menu-docentes.php">Docentes</a>
+          <a href="menu-projetos.php">Projetos</a>
+          <a href="views/auth/login.php" class="btn-login">Acesso Restrito</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="theme">
+        <div class="theme-overlay"></div>
+        <div class="theme-content">
+          <h1 class="theme-title">Nossos Laboratórios</h1>
+          <p class="theme-desc">
+            Infraestrutura moderna e equipamentos de ponta para ensino, pesquisa
+            e extensão.
+          </p>
+        </div>
+      </section>
+
+      <section class="filtro-section">
+        <div class="container">
+          <div class="filtro-box">
+            <div class="filtro-header">
+              <i class="fa-solid fa-filter"></i>
+              <h2>Filtrar por Área</h2>
+            </div>
+            <form class="filtro-form" onsubmit="event.preventDefault()">
+              <div class="filtro-opcoes">
+                <label class="checkbox-container">
+                  <input
+                    type="checkbox"
+                    value="ciencias"
+                    class="filtro-check"
+                  />
+                  <span class="checkmark"></span> Ciências
+                </label>
+                <label class="checkbox-container">
+                  <input
+                    type="checkbox"
+                    value="informatica"
+                    class="filtro-check"
+                  />
+                  <span class="checkmark"></span> Informática
+                </label>
+                <label class="checkbox-container">
+                  <input
+                    type="checkbox"
+                    value="metalurgia"
+                    class="filtro-check"
+                  />
+                  <span class="checkmark"></span> Metalurgia
+                </label>
+                <label class="checkbox-container">
+                  <input
+                    type="checkbox"
+                    value="pesquisa"
+                    class="filtro-check"
+                  />
+                  <span class="checkmark"></span> Pesquisa/Robótica
+                </label>
+              </div>
+              <button
+                type="button"
+                id="btn-limpar"
+                class="btn-filtrar"
+                style="background-color: #666"
+              >
+                Limpar Filtros
+              </button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <section class="labs-section">
+        <div class="container">
+          <div class="galeria-grid" id="labsContainer">
+            <article class="lab-card" data-area="informatica">
+              <div class="card-image">
+                <a href="static/lab-info-1.html">
+                  <img
+                    src="img/comp.jpg"
+                    alt="Foto do Laboratório de Informática"
+                    loading="lazy"
+                  />
+                  <span class="card-badge">Informática</span>
+                </a>
+              </div>
+              <div class="card-content">
+                <h3 class="card-title">
+                  <a href="static/lab-info-1.html"
+                    >Laboratório de Informática 1</a
+                  >
+                </h3>
+                <p class="card-info">
+                  <i class="fa-solid fa-users"></i> Capacidade: 40 alunos
+                </p>
+                <a href="static/lab-info-1.html" class="btn-detalhes">
+                  Conhecer Espaço <i class="fa-solid fa-arrow-right"></i>
+                </a>
+              </div>
+            </article>
+
+            <article class="lab-card" data-area="informatica">
+              <div class="card-image">
+                <a href="static/lab-info-2.html">
+                  <img
+                    src="img/comp.jpg"
+                    alt="Foto do Laboratório de Informática"
+                    loading="lazy"
+                  />
+                  <span class="card-badge">Informática</span>
+                </a>
+              </div>
+              <div class="card-content">
+                <h3 class="card-title">
+                  <a href="static/lab-info-2.html"
+                    >Laboratório de Informática 2</a
+                  >
+                </h3>
+                <p class="card-info">
+                  <i class="fa-solid fa-users"></i> Capacidade: 40 alunos
+                </p>
+                <a href="static/lab-info-2.html" class="btn-detalhes">
+                  Conhecer Espaço <i class="fa-solid fa-arrow-right"></i>
+                </a>
+              </div>
+            </article>
+
+            <article class="lab-card" data-area="informatica">
+              <div class="card-image">
+                <a href="static/lab-info-3.html">
+                  <img
+                    src="img/comp.jpg"
+                    alt="Foto do Laboratório de Informática"
+                    loading="lazy"
+                  />
+                  <span class="card-badge">Informática</span>
+                </a>
+              </div>
+              <div class="card-content">
+                <h3 class="card-title">
+                  <a href="static/lab-info-3.html"
+                    >Laboratório de Informática 3</a
+                  >
+                </h3>
+                <p class="card-info">
+                  <i class="fa-solid fa-users"></i> Capacidade: 40 alunos
+                </p>
+                <a href="static/lab-info-3.html" class="btn-detalhes">
+                  Conhecer Espaço <i class="fa-solid fa-arrow-right"></i>
+                </a>
+              </div>
+            </article>
+
+            <article class="lab-card" data-area="informatica">
+              <div class="card-image">
+                <a href="static/lab-info-4.html">
+                  <img
+                    src="img/comp.jpg"
+                    alt="Foto do Laboratório de Informática"
+                    loading="lazy"
+                  />
+                  <span class="card-badge">Informática</span>
+                </a>
+              </div>
+              <div class="card-content">
+                <h3 class="card-title">
+                  <a href="static/lab-info-4.html"
+                    >Laboratório de Informática 4</a
+                  >
+                </h3>
+                <p class="card-info">
+                  <i class="fa-solid fa-users"></i> Capacidade: 40 alunos
+                </p>
+                <a href="static/lab-info-4.html" class="btn-detalhes">
+                  Conhecer Espaço <i class="fa-solid fa-arrow-right"></i>
+                </a>
+              </div>
+            </article>
+
+            <article class="lab-card" data-area="metalurgia">
+              <div class="card-image">
+                <a href="static/lab-met-1.html">
+                  <img
+                    src="img/lab-met-1.png"
+                    alt="Foto do Laboratório de Metalurgia"
+                    loading="lazy"
+                  />
+                  <span class="card-badge metalurgia">Metalurgia</span>
+                </a>
+              </div>
+              <div class="card-content">
+                <h3 class="card-title">
+                  <a href="static/lab-met-1.html"
+                    >Laboratório de Metalurgia 1</a
+                  >
+                </h3>
+                <p class="card-info">
+                  <i class="fa-solid fa-flask"></i> Ensaios e Análises
+                </p>
+                <a href="static/lab-met-1.html" class="btn-detalhes">
+                  Conhecer Espaço <i class="fa-solid fa-arrow-right"></i>
+                </a>
+              </div>
+            </article>
+
+            <article class="lab-card" data-area="metalurgia">
+              <div class="card-image">
+                <a href="static/lab-met-2.html">
+                  <img
+                    src="img/lab-met-2.png"
+                    alt="Foto do Laboratório de Metalurgia"
+                    loading="lazy"
+                  />
+                  <span class="card-badge metalurgia">Metalurgia</span>
+                </a>
+              </div>
+              <div class="card-content">
+                <h3 class="card-title">
+                  <a href="static/lab-met-2.html"
+                    >Laboratório de Metalurgia 2</a
+                  >
+                </h3>
+                <p class="card-info">
+                  <i class="fa-solid fa-flask"></i> Ensaios e Análises
+                </p>
+                <a href="static/lab-met-2.html" class="btn-detalhes">
+                  Conhecer Espaço <i class="fa-solid fa-arrow-right"></i>
+                </a>
+              </div>
+            </article>
+
+            <article class="lab-card" data-area="metalurgia">
+              <div class="card-image">
+                <a href="static/lab-met-3.html">
+                  <img
+                    src="img/lab-met-3.png"
+                    alt="Foto do Laboratório de Metalurgia"
+                    loading="lazy"
+                  />
+                  <span class="card-badge metalurgia">Metalurgia</span>
+                </a>
+              </div>
+              <div class="card-content">
+                <h3 class="card-title">
+                  <a href="static/lab-met-3.html"
+                    >Laboratório de Metalurgia 3</a
+                  >
+                </h3>
+                <p class="card-info">
+                  <i class="fa-solid fa-flask"></i> Ensaios e Análises
+                </p>
+                <a href="static/lab-met-3.html" class="btn-detalhes">
+                  Conhecer Espaço <i class="fa-solid fa-arrow-right"></i>
+                </a>
+              </div>
+            </article>
+
+            <article class="lab-card" data-area="pesquisa">
+              <div class="card-image">
+                <a href="static/lab-robotica.html">
+                  <img
+                    src="img/lab-rob.png"
+                    alt="Foto do Laboratório de Robótica"
+                    loading="lazy"
+                  />
+                  <span class="card-badge pesquisa">Robótica</span>
+                </a>
+              </div>
+              <div class="card-content">
+                <h3 class="card-title">
+                  <a href="static/lab-robotica.html">Laboratório de Robótica</a>
+                </h3>
+                <p class="card-info">
+                  <i class="fa-solid fa-microchip"></i> Automação e Projetos
+                </p>
+                <a href="static/lab-robotica.html" class="btn-detalhes">
+                  Conhecer Espaço <i class="fa-solid fa-arrow-right"></i>
+                </a>
+              </div>
+            </article>
+
+            <article class="lab-card" data-area="ciencias">
+              <div class="card-image">
+                <a href="static/lab-ciencias.html">
+                  <img
+                    src="img/lab-ciencias.png"
+                    alt="Foto do Laboratório de Ciências"
+                    loading="lazy"
+                  />
+                  <span class="card-badge ciencias">Ciências</span>
+                </a>
+              </div>
+              <div class="card-content">
+                <h3 class="card-title">
+                  <a href="static/lab-ciencias.html">Laboratório de Ciências</a>
+                </h3>
+                <p class="card-info">
+                  <i class="fa-solid fa-leaf"></i> Biologia e Química
+                </p>
+                <a href="static/lab-ciencias.html" class="btn-detalhes">
+                  Conhecer Espaço <i class="fa-solid fa-arrow-right"></i>
+                </a>
+              </div>
+            </article>
+
+            <article class="lab-card" data-area="pesquisa">
+              <div class="card-image">
+                <a href="static/lab-pesquisa.html">
+                  <img
+                    src="img/lab-pesquisa.png"
+                    alt="Foto do Laboratório de Pesquisa"
+                    loading="lazy"
+                  />
+                  <span class="card-badge pesquisa">Pesquisa</span>
+                </a>
+              </div>
+              <div class="card-content">
+                <h3 class="card-title">
+                  <a href="static/lab-pesquisa.html">Laboratório de Pesquisa</a>
+                </h3>
+                <p class="card-info">
+                  <i class="fa-solid fa-leaf"></i> Biologia e Química
+                </p>
+                <a href="static/lab-pesquisa.html" class="btn-detalhes">
+                  Conhecer Espaço <i class="fa-solid fa-arrow-right"></i>
+                </a>
+              </div>
+            </article>
+          </div>
+
+          <div
+            id="no-results"
+            style="
+              display: none;
+              text-align: center;
+              padding: 40px;
+              color: #666;
+            "
+          >
+            <i
+              class="fa-solid fa-magnifying-glass"
+              style="font-size: 3rem; margin-bottom: 15px; color: #ccc"
+            ></i>
+            <p>Nenhum laboratório encontrado para os filtros selecionados.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="container">
+        <div class="footer-content">
+          <div class="footer-section">
+            <h4>Endereço</h4>
+            <p>
+              <i class="fa-solid fa-location-dot"></i> Rua Afonso Sardinha,
+              90<br />Ouro Branco, MG - 36420-000
+            </p>
+          </div>
+          <div class="footer-section">
+            <h4>Funcionamento</h4>
+            <p><i class="fa-regular fa-clock"></i> Seg a Sex: 08h - 22h</p>
+            <p>Sábado: 12h - 20h</p>
+          </div>
+          <div class="footer-section">
+            <h4>Contato</h4>
+            <p>
+              <i class="fa-regular fa-envelope"></i>
+              secretaria.ourobranco@ifmg.edu.br
+            </p>
+            <p><i class="fa-solid fa-phone"></i> (31) 2137-5700</p>
+          </div>
+          <div class="footer-section">
+            <h4>Redes Sociais</h4>
+            <div class="social-icons">
+              <a href="#" aria-label="Youtube"
+                ><i class="fa-brands fa-youtube"></i
+              ></a>
+              <a href="#" aria-label="Instagram"
+                ><i class="fa-brands fa-instagram"></i
+              ></a>
+              <a href="#" aria-label="Facebook"
+                ><i class="fa-brands fa-facebook"></i
+              ></a>
+            </div>
+          </div>
+        </div>
+        <div class="copyright">
+          <p>
+            &copy; 2025 Instituto Federal de Minas Gerais - Campus Ouro Branco
+          </p>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // Elementos do DOM
+        const checkboxes = document.querySelectorAll(".filtro-check");
+        const cards = document.querySelectorAll(".lab-card");
+        const btnLimpar = document.getElementById("btn-limpar");
+        const noResultsMsg = document.getElementById("no-results");
+        const menuToggle = document.querySelector(".menu-toggle");
+        const navItems = document.querySelector(".nav-items");
+
+        // Função de Filtro
+        function filtrarLaboratorios() {
+          // Cria um array com os valores dos checkboxes marcados
+          const areasSelecionadas = Array.from(checkboxes)
+            .filter((cb) => cb.checked)
+            .map((cb) => cb.value);
+
+          let visiveis = 0;
+
+          cards.forEach((card) => {
+            const areaCard = card.getAttribute("data-area");
+
+            // Se não houver filtro selecionado OU a área do card estiver na lista de selecionados
+            if (
+              areasSelecionadas.length === 0 ||
+              areasSelecionadas.includes(areaCard)
+            ) {
+              card.style.display = "flex"; // Mostra (flex para manter o layout do card)
+              visiveis++;
+            } else {
+              card.style.display = "none"; // Esconde
+            }
+          });
+
+          // Mostra mensagem se nada for encontrado
+          if (visiveis === 0) {
+            noResultsMsg.style.display = "block";
+          } else {
+            noResultsMsg.style.display = "none";
+          }
+        }
+
+        // Eventos
+        checkboxes.forEach((cb) => {
+          cb.addEventListener("change", filtrarLaboratorios);
+        });
+
+        btnLimpar.addEventListener("click", function () {
+          checkboxes.forEach((cb) => (cb.checked = false));
+          filtrarLaboratorios(); // Reseta a visualização
+        });
+
+        // Menu Mobile (Toggle)
+        menuToggle.addEventListener("click", function () {
+          navItems.classList.toggle("active");
+        });
+      });
+    </script>
+  </body>
+</html>
