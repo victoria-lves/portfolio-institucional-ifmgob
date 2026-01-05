@@ -75,7 +75,7 @@ $keywords_docente = "Professor " . $nome_prof . " IFMG Ouro Branco, " . $area_pr
             <div class="row align-items-center">
                 <div class="col-md-3 text-center">
                     <?php if($dados['pfp']): ?>
-                    <img src="../uploads/professores/<?php echo $dados['pfp']; ?>" 
+                    <img src="../assets/img/docentes<?php echo $dados['pfp']; ?>" 
                          class="profile-avatar" 
                          alt="<?php echo $dados['nome']; ?>">
                     <?php else: ?>

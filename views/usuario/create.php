@@ -1,7 +1,4 @@
 <?php
-// ==============================================
-// views/projeto/create.php - Cadastrar Novo Projeto
-// ==============================================
 
 session_start();
 
