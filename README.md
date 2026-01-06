@@ -52,7 +52,6 @@ A escolha das ferramentas priorizou a robustez, a facilidade de manutenção e a
 O projeto segue padrões de design para garantir **baixa acoplagem e alta coesão**:
 
 * **Padrão MVC (Model-View-Controller):** Separação clara entre a lógica de negócios, a camada de dados e a interface do usuário.
-* **MVC com DAO (Data Access Object):** A lógica de acesso a dados e regras de negócio está encapsulada nos Models. Isso centraliza as consultas SQL, evitando código duplicado e facilitando a manutenção.
 * **Tratamento de Erros:** Implementação de `try/catch` global. Erros críticos geram logs no servidor (para auditoria), mas exibem mensagens amigáveis ao usuário final, evitando *stack traces* expostos (Security by Obscurity).
 
 ---
@@ -78,10 +77,9 @@ Seguindo as diretrizes da **OWASP Top 10** e **LGPD**:
 
 1. **SQL Injection:** 100% das consultas utilizam **Prepared Statements** (PDO).
 2. **XSS (Cross-Site Scripting):** Toda saída de dados (output) passa por funções de sanitização (`htmlspecialchars`) para impedir injeção de scripts.
-3. **CSRF:** Tokens de validação em formulários de estado crítico.
-4. **Autenticação:** Senhas armazenadas com hash **Bcrypt** (ou Argon2). Gerenciamento de sessão com regeneração de ID no login para evitar *Session Hijacking*.
-5. **Upload Seguro:** Verificação rigorosa de MIME Types (não apenas extensão) para impedir upload de scripts maliciosos (ex: `.php` disfarçado de `.jpg`).
-6. **LGPD:** Funcionalidades preparadas para "Direito ao Esquecimento" e logs de acesso transparentes.
+3. **Autenticação:** Senhas armazenadas com hash **Bcrypt** (ou Argon2). Gerenciamento de sessão com regeneração de ID no login para evitar *Session Hijacking*.
+4. **Upload Seguro:** Verificação rigorosa de MIME Types (não apenas extensão) para impedir upload de scripts maliciosos (ex: `.php` disfarçado de `.jpg`).
+5. **LGPD:** Funcionalidades preparadas para "Direito ao Esquecimento" e logs de acesso transparentes.
 
 ---
 
@@ -96,7 +94,6 @@ Seguindo as diretrizes da **OWASP Top 10** e **LGPD**:
 
 ## 🚀 Performance e SEO
 
-* **Indexação:** Uso de URLs amigáveis (mod_rewrite) e meta tags dinâmicas para melhor ranqueamento no Google.
 * **Otimização de Consultas:** Índices criados em colunas de busca frequente (além das Primary Keys) para garantir velocidade mesmo com milhares de registros.
 * **Assets:** Minificação de CSS/JS (em ambiente de produção) para reduzir o tempo de carregamento.
 
@@ -110,5 +107,6 @@ Embora funcional, o projeto prevê evoluções contínuas:
 * [ ] **Soft Delete:** Implementar sistema de "lixeira" (marcar como deletado ao invés de remover fisicamente) para maior segurança de dados.
 * [ ] **API RESTful Completa:** Desacoplar totalmente o front-end usando um framework JS (React/Vue).
 * [ ] **Cache:** Implementar Redis ou Memcached para consultas pesadas.
+* [ ] **CSRF:** Tokens de validação em formulários de estado crítico.
 * [ ] **Testes Automatizados:** Ampliar a cobertura de testes unitários (PHPUnit) e testes E2E.
 
