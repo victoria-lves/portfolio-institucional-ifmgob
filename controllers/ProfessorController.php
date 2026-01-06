@@ -1,22 +1,18 @@
 <?php
-// ==============================================
-// controllers/ProfessorController.php
-// ==============================================
 
-// 1. Correção da Sessão: Só inicia se não houver uma ativa
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// 2. Correção dos Caminhos: Usa __DIR__ para garantir o caminho correto independente de onde é chamado
+// Configurações e Imports
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../models/Professor.php';
+require_once __DIR__ . '/../utils/ImageHandler.php';
 
 class ProfessorController
 {
     private $db;
     private $professor;
-    // Caminho absoluto para evitar erros ao mover arquivos ou incluir de outros locais
     private $uploadDir;
 
     public function __construct()
@@ -25,15 +21,19 @@ class ProfessorController
         $this->db = $database->getConnection();
         $this->professor = new Professor($this->db);
 
-        // Define o diretório de upload relativo à localização deste arquivo de controller
+        // Caminho da pasta de imagens (ajustado para a estrutura informada no edit.php: ../../assets/img/docentes/)
         $this->uploadDir = __DIR__ . '/../assets/img/docentes/';
+
+        // Garante que a pasta existe
+        if (!is_dir($this->uploadDir)) {
+            mkdir($this->uploadDir, 0777, true);
+        }
     }
 
-    // ==========================================================
-    // CRIAR PERFIL
-    // ==========================================================
+    // CRIAR PERFIL (Action: create)
     public function create()
     {
+        // 1. Verificar Login
         if (!isset($_SESSION['usuario_id'])) {
             header("Location: ../views/auth/login.php");
             exit();
@@ -41,53 +41,77 @@ class ProfessorController
 
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             try {
-                $foto_nome = 'default.webp';
+                // 2. Upload de Imagem Seguro (usando ImageHandler)
+                // O form create.php usa 'foto_perfil'
+                $nome_imagem = null;
 
                 if (isset($_FILES['foto_perfil']) && $_FILES['foto_perfil']['error'] === UPLOAD_ERR_OK) {
-                    $foto_nome = $this->uploadImagem($_FILES['foto_perfil']);
+                    $novoNome = uniqid('docente_') . '.webp';
+                    
+                    if (ImageHandler::resizeAndSave($_FILES['foto_perfil'], $this->uploadDir, $novoNome, 800)) {
+                        $nome_imagem = $novoNome;
+                    } else {
+                        throw new Exception("Falha ao processar imagem. Use JPG, PNG ou WEBP.");
+                    }
                 }
 
+                // 3. Popular Objeto Professor (Mapeando inputs do create.php para colunas do Banco)
+                // create.php usa: nome, email, titulacao, area_atuacao, biografia, link_lattes
+                
                 $this->professor->nome = $_POST['nome'];
                 $this->professor->email = $_POST['email'];
-                $this->professor->titulacao = $_POST['titulacao'];
-                $this->professor->area_atuacao = $_POST['area_atuacao'];
-                $this->professor->biografia = $_POST['biografia'];
-                $this->professor->link_lattes = $_POST['link_lattes'];
-                $this->professor->foto_perfil = $foto_nome;
+                
+                // Mapeamento: Titulação (Form) -> Formação (Banco)
+                $this->professor->formacao = $_POST['titulacao'] ?? null;
+                
+                // Mapeamento: Área de Atuação (Form) -> Disciplina (Banco/Conceito mais próximo)
+                $this->professor->disciplina = $_POST['area_atuacao'] ?? null;
+                
+                // Mapeamento: Biografia (Form) -> Bio (Banco)
+                $this->professor->bio = $_POST['biografia'] ?? null;
+                
+                // Mapeamento: Link Lattes (Form) -> Lattes (Banco)
+                $this->professor->lattes = $_POST['link_lattes'] ?? null;
+                
+                $this->professor->pfp = $nome_imagem; // Campo 'pfp' no banco
 
-                // Vínculo com Usuario
+                // Campos opcionais que não existem no create.php (ficam NULL)
+                $this->professor->linkedin = null;
+                $this->professor->gabinete = null;
+                $this->professor->atendimento = null;
+
+                // 4. Vincular ID do Usuário
                 if (isset($_SESSION['usuario_id']) && $_SESSION['usuario_nivel'] == 'professor') {
-                    $this->professor->usuario_id = $_SESSION['usuario_id'];
+                    $this->professor->id_usuario = $_SESSION['usuario_id'];
                 } else if (isset($_POST['usuario_id'])) {
-                    $this->professor->usuario_id = $_POST['usuario_id'];
+                    $this->professor->id_usuario = $_POST['usuario_id']; // Caso Admin esteja criando para outro
+                } else {
+                    throw new Exception("ID do usuário obrigatório.");
                 }
 
+                // 5. Salvar no Banco
                 if ($this->professor->criar()) {
                     if ($_SESSION['usuario_nivel'] == 'professor') {
-                        // Atualiza sessão se for o próprio professor
                         $_SESSION['professor_id'] = $this->db->lastInsertId();
                         $_SESSION['sucesso'] = "Perfil criado com sucesso!";
                         header("Location: ../views/sistema/painel.php");
                     } else {
                         $_SESSION['sucesso'] = "Professor cadastrado com sucesso!";
-                        header("Location: ../views/professor/edit.php");
+                        header("Location: ../views/professor/edit.php"); // Ou lista de professores
                     }
                 } else {
-                    throw new Exception("Erro ao salvar dados no banco.");
+                    throw new Exception("Erro ao inserir registro no banco de dados.");
                 }
 
             } catch (Exception $e) {
                 $_SESSION['erro'] = "Erro: " . $e->getMessage();
-                // Redireciona de volta para a origem se possível, ou para o create
                 header("Location: ../views/professor/create.php");
             }
             exit();
         }
     }
 
-    // ==========================================================
-    // ATUALIZAR PERFIL
-    // ==========================================================
+    // ATUALIZAR PERFIL (Action: update)
     public function update()
     {
         if (!isset($_SESSION['usuario_id'])) {
@@ -97,38 +121,77 @@ class ProfessorController
 
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             try {
-                $id = $_POST['id'];
+                // O edit.php não passa ID hidden normalmente, mas pega da URL ou Sessão. 
+                // Assumindo que o form envie um input hidden 'id' ou que peguemos da sessão.
+                $id = $_POST['id'] ?? $_SESSION['professor_id'];
 
+                if (!$id) {
+                    throw new Exception("ID do professor não identificado.");
+                }
+
+                // Verificação de permissão
                 if ($_SESSION['usuario_nivel'] != 'admin') {
                     if (!isset($_SESSION['professor_id']) || $_SESSION['professor_id'] != $id) {
                         throw new Exception("Sem permissão para editar este perfil.");
                     }
                 }
 
+                // Buscar dados atuais para manter a foto se não for trocada
                 $dadosAtuais = $this->professor->buscarPorId($id);
+                if (!$dadosAtuais) throw new Exception("Professor não encontrado.");
+
                 $this->professor->id = $id;
-                $this->professor->nome = $_POST['nome'];
-                $this->professor->email = $_POST['email'];
-                $this->professor->titulacao = $_POST['titulacao'];
-                $this->professor->area_atuacao = $_POST['area_atuacao'];
-                $this->professor->biografia = $_POST['biografia'];
-                $this->professor->link_lattes = $_POST['link_lattes'];
 
-                if (isset($_FILES['foto_perfil']) && $_FILES['foto_perfil']['error'] === UPLOAD_ERR_OK) {
-                    $this->professor->foto_perfil = $this->uploadImagem($_FILES['foto_perfil']);
+                // 1. Processar Imagem (edit.php usa name='pfp')
+                if (isset($_FILES['pfp']) && $_FILES['pfp']['error'] === UPLOAD_ERR_OK) {
+                    $novoNome = uniqid('docente_') . '.webp';
+                    
+                    if (ImageHandler::resizeAndSave($_FILES['pfp'], $this->uploadDir, $novoNome, 800)) {
+                        $this->professor->pfp = $novoNome;
 
-                    if ($dadosAtuais['foto_perfil'] != 'default.webp' && file_exists($this->uploadDir . $dadosAtuais['foto_perfil'])) {
-                        unlink($this->uploadDir . $dadosAtuais['foto_perfil']);
+                        // Apagar imagem antiga se existir e não for padrão
+                        if (!empty($dadosAtuais['pfp']) && 
+                            $dadosAtuais['pfp'] != 'default.webp' && 
+                            file_exists($this->uploadDir . $dadosAtuais['pfp'])) {
+                            unlink($this->uploadDir . $dadosAtuais['pfp']);
+                        }
+                    } else {
+                        throw new Exception("Falha ao salvar a nova imagem.");
                     }
                 } else {
-                    $this->professor->foto_perfil = $dadosAtuais['foto_perfil'];
+                    // Mantém a imagem atual
+                    $this->professor->pfp = $dadosAtuais['pfp'];
                 }
 
+                // 2. Popular Campos (Suportando nomes do edit.php E create.php para flexibilidade)
+                
+                $this->professor->nome = $_POST['nome'];
+                $this->professor->email = $_POST['email'];
+                
+                // Mapeamentos Flexíveis (Pega o que vier)
+                $this->professor->bio = $_POST['bio'] ?? $_POST['biografia'] ?? $dadosAtuais['bio'];
+                $this->professor->formacao = $_POST['formacao'] ?? $_POST['titulacao'] ?? $dadosAtuais['formacao'];
+                $this->professor->disciplina = $_POST['disciplina'] ?? $_POST['area_atuacao'] ?? $dadosAtuais['disciplina'];
+                $this->professor->lattes = $_POST['lattes'] ?? $_POST['link_lattes'] ?? $dadosAtuais['lattes'];
+                
+                // Novos campos específicos do edit.php/Banco atualizado
+                $this->professor->linkedin = $_POST['linkedin'] ?? $dadosAtuais['linkedin'];
+                $this->professor->gabinete = $_POST['gabinete'] ?? $dadosAtuais['gabinete'];
+                $this->professor->atendimento = $_POST['atendimento'] ?? $dadosAtuais['atendimento'];
+
+                // 3. Atualizar
                 if ($this->professor->atualizar()) {
                     $_SESSION['sucesso'] = "Perfil atualizado com sucesso!";
+                    
+                    // Se for o próprio usuário, atualiza o nome na sessão também
+                    if (isset($_SESSION['professor_id']) && $_SESSION['professor_id'] == $id) {
+                        $_SESSION['usuario_nome'] = $_POST['nome'];
+                    }
 
+                    // Redireciona
                     if ($_SESSION['usuario_nivel'] == 'admin') {
-                        header("Location: ../views/professor/edit.php");
+                        // Se admin editou, volta para lista ou para o mesmo edit
+                         header("Location: ../views/professor/edit.php?id=" . $id);
                     } else {
                         header("Location: ../views/professor/edit.php?id=" . $id);
                     }
@@ -138,14 +201,16 @@ class ProfessorController
 
             } catch (Exception $e) {
                 $_SESSION['erro'] = $e->getMessage();
-                header("Location: ../views/professor/edit.php");
+                // Tenta voltar para a página de edição correta
+                $idRedirect = isset($_POST['id']) ? "?id=" . $_POST['id'] : "";
+                header("Location: ../views/professor/edit.php" . $idRedirect);
             }
             exit();
         }
     }
 
     // ==========================================================
-    // EXCLUIR PROFESSOR
+    // EXCLUIR PROFESSOR (Action: delete)
     // ==========================================================
     public function delete()
     {
@@ -161,52 +226,24 @@ class ProfessorController
 
             try {
                 if ($this->professor->delete($id)) {
-                    if ($dados && $dados['foto_perfil'] != 'default.webp') {
-                        $caminho = $this->uploadDir . $dados['foto_perfil'];
+                    // Apagar foto se existir
+                    if ($dados && !empty($dados['pfp']) && $dados['pfp'] != 'default.webp') {
+                        $caminho = $this->uploadDir . $dados['pfp'];
                         if (file_exists($caminho)) {
                             unlink($caminho);
                         }
                     }
                     $_SESSION['sucesso'] = "Professor excluído com sucesso!";
                 } else {
-                    throw new Exception("Não foi possível excluir. Verifique vínculos (projetos/produções).");
+                    throw new Exception("Não foi possível excluir. Verifique se há projetos vinculados.");
                 }
             } catch (Exception $e) {
                 $_SESSION['erro'] = "Erro: " . $e->getMessage();
             }
 
-            header("Location: ../views/professor/edit.php");
+            // Redireciona para listagem (assumindo que existe, senão painel)
+            header("Location: ../views/sistema/professor.php"); 
             exit();
-        }
-    }
-
-    // ==========================================================
-    // MÉTODO AUXILIAR DE UPLOAD
-    // ==========================================================
-    private function uploadImagem($arquivo)
-    {
-        if (!is_dir($this->uploadDir)) {
-            mkdir($this->uploadDir, 0777, true);
-        }
-
-        $extensao = strtolower(pathinfo($arquivo['name'], PATHINFO_EXTENSION));
-        $permitidos = ['jpg', 'jpeg', 'png', 'webp'];
-
-        if (!in_array($extensao, $permitidos)) {
-            throw new Exception("Formato inválido. Use JPG, PNG ou WEBP.");
-        }
-
-        if ($arquivo['size'] > 5 * 1024 * 1024) {
-            throw new Exception("Imagem muito grande. Máximo 5MB.");
-        }
-
-        $novoNome = uniqid('prof_') . '.' . $extensao;
-        $caminhoCompleto = $this->uploadDir . $novoNome;
-
-        if (move_uploaded_file($arquivo['tmp_name'], $caminhoCompleto)) {
-            return $novoNome;
-        } else {
-            throw new Exception("Falha ao salvar a imagem no servidor.");
         }
     }
 }
@@ -214,7 +251,6 @@ class ProfessorController
 // ==========================================================
 // ROTEAMENTO
 // ==========================================================
-// Verifica se há uma ação definida na URL (GET) e executa o método correspondente
 if (isset($_GET['action'])) {
     $controller = new ProfessorController();
 
@@ -228,7 +264,6 @@ if (isset($_GET['action'])) {
         case 'delete':
             $controller->delete();
             break;
-        // Não adicionamos default redirect aqui para evitar loops se incluído sem action
     }
 }
 ?>

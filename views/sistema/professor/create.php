@@ -1,7 +1,5 @@
 <?php
-// ==============================================
-// views/professor/create.php - Cadastrar Perfil Docente
-// ==============================================
+// views/professor/create.php
 
 session_start();
 
@@ -13,7 +11,7 @@ if (!isset($_SESSION['usuario_id'])) {
 
 // Verificar Permissão: Apenas Admin ou Professor
 if ($_SESSION['usuario_nivel'] != 'admin' && $_SESSION['usuario_nivel'] != 'professor') {
-    header("Location: ../sistema/painel.php");
+    header("Location: ../painel.php");
     exit();
 }
 
@@ -95,7 +93,7 @@ $completar = isset($_GET['completar']);
                     </p>
                 </div>
                 <div>
-                    <a href="../sistema/painel.php" class="btn btn-outline-light">
+                    <a href="../painel.php" class="btn btn-outline-light">
                         <i class="bi bi-speedometer2 me-1"></i> Painel
                     </a>
                 </div>
@@ -121,7 +119,7 @@ $completar = isset($_GET['completar']);
                     <div>
                         <h6 class="alert-heading fw-bold mb-1">Perfil Incompleto</h6>
                         <p class="mb-0 small">Para cadastrar projetos ou produções, você precisará preencher este
-                            formulário. Você pode <a href="../sistema/painel.php" class="alert-link">fazer isso mais
+                            formulário. Você pode <a href="../painel.php" class="alert-link">fazer isso mais
                                 tarde</a>,
                             mas algumas funções estarão bloqueadas.</p>
                     </div>
@@ -212,7 +210,7 @@ $completar = isset($_GET['completar']);
                             </button>
 
                             <?php if ($completar): ?>
-                                <a href="../sistema/painel.php" class="btn btn-outline-secondary btn-sm mt-2">
+                                <a href="../painel.php" class="btn btn-outline-secondary btn-sm mt-2">
                                     Fazer isso mais tarde
                                 </a>
                             <?php endif; ?>

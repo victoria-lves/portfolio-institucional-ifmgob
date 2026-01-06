@@ -1,4 +1,5 @@
 <?php
+//models/Professor.php
 class Professor {
     private $conn;
     private $table = "professor";

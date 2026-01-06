@@ -1,16 +1,15 @@
 <?php
-// controllers/AuthController.php
-session_start();
 
-// Importar configurações e modelos necessários
-// Ajuste os caminhos conforme a estrutura de pastas
-require_once '../config/database.php';
-// Se tiver um Model Usuario, seria ideal usá-lo, mas vamos manter PDO direto por simplicidade e compatibilidade
-// require_once '../models/Usuario.php'; 
+// 1. Verificação de Sessão (Evita avisos)
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// 2. Caminhos Absolutos
+require_once __DIR__ . '/../config/database.php';
 
 class AuthController
 {
-
     private $db;
 
     public function __construct()
@@ -27,12 +26,10 @@ class AuthController
             exit();
         }
 
-        // Verifica se é POST
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $email = $_POST['email'] ?? '';
+            $email = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL);
             $senha = $_POST['senha'] ?? '';
 
-            // Validação básica
             if (empty($email) || empty($senha)) {
                 $_SESSION['erro'] = "Preencha todos os campos!";
                 header("Location: ../views/auth/login.php");
@@ -40,7 +37,7 @@ class AuthController
             }
 
             try {
-                // Buscar usuário pelo email
+                // 1. Buscar usuário
                 $query = "SELECT id, nome, email, senha, nivel FROM usuario WHERE email = :email LIMIT 1";
                 $stmt = $this->db->prepare($query);
                 $stmt->bindParam(':email', $email);
@@ -49,28 +46,31 @@ class AuthController
                 if ($stmt->rowCount() > 0) {
                     $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
 
-                    // Verificar senha (Hash)
+                    // 2. Verificar Senha
                     if (password_verify($senha, $usuario['senha'])) {
-                        // SUCESSO!
-
-                        // Segurança: Regenerar ID da sessão para evitar fixação
+                        
+                        // Segurança: Regenerar ID da sessão
                         session_regenerate_id(true);
 
-                        // Definir variáveis de sessão
+                        // Definir Sessão
                         $_SESSION['usuario_id'] = $usuario['id'];
                         $_SESSION['usuario_nome'] = $usuario['nome'];
                         $_SESSION['usuario_nivel'] = $usuario['nivel'];
+                        $_SESSION['login_time'] = time();
 
-                        // Se for professor, tenta buscar o ID de professor (opcional, mas útil)
+                        // 3. Se for professor, buscar o ID do Perfil Docente
                         if ($usuario['nivel'] == 'professor') {
-                            $stmtProf = $this->db->prepare("SELECT id FROM professor WHERE usuario_id = :uid LIMIT 1");
+                            // [CORREÇÃO CRÍTICA] O campo no banco é 'id_usuario', não 'usuario_id'
+                            $stmtProf = $this->db->prepare("SELECT id FROM professor WHERE id_usuario = :uid LIMIT 1");
                             $stmtProf->execute([':uid' => $usuario['id']]);
+                            
                             if ($prof = $stmtProf->fetch(PDO::FETCH_ASSOC)) {
                                 $_SESSION['professor_id'] = $prof['id'];
+                            } else {
+                                // Usuário é professor mas não tem perfil criado ainda
+                                // Opcional: Redirecionar para criar perfil
                             }
                         }
-
-                        $_SESSION['login_time'] = time();
 
                         header("Location: ../views/sistema/painel.php");
                         exit();
@@ -84,8 +84,7 @@ class AuthController
                 $_SESSION['erro'] = "Erro no sistema: " . $e->getMessage();
             }
 
-            // Se chegou aqui, deu erro, volta para o login
-            // Preserva o email para não precisar digitar de novo
+            // Falha
             $_SESSION['old_email'] = $email;
             header("Location: ../views/auth/login.php");
             exit();
@@ -94,30 +93,35 @@ class AuthController
 
     public function logout()
     {
-        // Destruir sessão
         session_unset();
         session_destroy();
 
-        // Iniciar nova sessão apenas para mensagem de sucesso
+        // Inicia nova sessão para exibir mensagem
         session_start();
-        $_SESSION['logout_sucesso'] = "Você saiu do sistema.";
+        $_SESSION['logout_sucesso'] = "Você saiu do sistema."; // Mensagem ajustada para o login.php capturar
 
         header("Location: ../views/auth/login.php");
         exit();
     }
 }
 
-// Roteamento Simples
-// Verifica a "action" na URL (ex: AuthController.php?action=login)
-$action = $_GET['action'] ?? null;
-$controller = new AuthController();
-
-if ($action == 'login') {
-    $controller->login();
-} elseif ($action == 'logout') {
-    $controller->logout();
+// Roteamento
+if (isset($_GET['action'])) {
+    $controller = new AuthController();
+    
+    switch ($_GET['action']) {
+        case 'login':
+            $controller->login();
+            break;
+        case 'logout':
+            $controller->logout();
+            break;
+        default:
+            header("Location: ../views/auth/login.php");
+            exit();
+    }
 } else {
-    // Se acessar direto, redireciona para a view de login
+    // Acesso direto sem action redireciona
     header("Location: ../views/auth/login.php");
     exit();
 }

@@ -1,8 +1,4 @@
 <?php
-// ==============================================
-// views/professor/edit.php - Editar Perfil do Professor
-// ==============================================
-
 session_start();
 
 // 1. Verificações de Segurança
@@ -20,14 +16,14 @@ if (!$id_professor && $_SESSION['usuario_nivel'] == 'professor') {
 
 if (!$id_professor) {
     $_SESSION['erro'] = "Professor não identificado.";
-    header("Location: ../sistema/painel.php");
+    header("Location: ../painel.php");
     exit();
 }
 
 // Verifica permissão: Só o próprio professor ou Admin podem editar
 if ($_SESSION['usuario_nivel'] != 'admin' && $_SESSION['professor_id'] != $id_professor) {
     $_SESSION['erro'] = "Você não tem permissão para editar este perfil.";
-    header("Location: ../sistema/painel.php");
+    header("Location: ../painel.php");
     exit();
 }
 
@@ -35,77 +31,8 @@ require_once '../../../config/database.php';
 $database = new Database();
 $db = $database->getConnection();
 
-// 2. Processar Formulário (POST)
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    try {
-        // Query de Update
-        $query = "UPDATE professor SET 
-                  nome = :nome,
-                  bio = :bio,
-                  email = :email,
-                  lattes = :lattes,
-                  linkedin = :linkedin,
-                  gabinete = :gabinete,
-                  atendimento = :atendimento,
-                  formacao = :formacao
-                  WHERE id = :id";
-
-        $stmt = $db->prepare($query);
-
-        $params = [
-            ':nome' => $_POST['nome'],
-            ':bio' => $_POST['bio'],
-            ':email' => $_POST['email'],
-            ':lattes' => $_POST['lattes'],
-            ':linkedin' => $_POST['linkedin'],
-            ':gabinete' => $_POST['gabinete'],
-            ':atendimento' => $_POST['atendimento'],
-            ':formacao' => $_POST['formacao'],
-            ':id' => $id_professor
-        ];
-
-        if ($stmt->execute($params)) {
-
-            // Upload da Foto de Perfil (Opcional)
-            if (isset($_FILES['pfp']) && $_FILES['pfp']['error'] === UPLOAD_ERR_OK) {
-                $ext = strtolower(pathinfo($_FILES['pfp']['name'], PATHINFO_EXTENSION));
-                $permitidos = ['jpg', 'jpeg', 'png', 'webp'];
-
-                if (in_array($ext, $permitidos)) {
-                    $novo_nome = "docente_" . $id_professor . "_" . uniqid() . "." . $ext;
-                    $destino = "../../img/docentes/" . $novo_nome;
-
-                    // Cria a pasta se não existir
-                    if (!is_dir("../../img/docentes/"))
-                        mkdir("../../img/docentes/", 0777, true);
-
-                    if (move_uploaded_file($_FILES['pfp']['tmp_name'], $destino)) {
-                        // Atualiza o banco com o nome da foto
-                        $stmt_foto = $db->prepare("UPDATE professor SET pfp = :pfp WHERE id = :id");
-                        $stmt_foto->execute([':pfp' => $novo_nome, ':id' => $id_professor]);
-                    }
-                }
-            }
-
-            $_SESSION['sucesso'] = "Perfil atualizado com sucesso!";
-            // Se for o próprio usuário logado, atualiza o nome na sessão também
-            if ($_SESSION['professor_id'] == $id_professor) {
-                $_SESSION['usuario_nome'] = $_POST['nome'];
-            }
-        } else {
-            $_SESSION['erro'] = "Erro ao atualizar perfil.";
-        }
-
-    } catch (Exception $e) {
-        $_SESSION['erro'] = "Erro: " . $e->getMessage();
-    }
-
-    // Recarrega a página para mostrar mensagens
-    header("Location: edit.php?id=" . $id_professor);
-    exit();
-}
-
-// 3. Buscar Dados Atuais
+// 2. Buscar Dados Atuais (Apenas para exibir no formulário)
+// A lógica de SALVAR (Update) agora está no ProfessorController.php
 $stmt = $db->prepare("SELECT * FROM professor WHERE id = :id LIMIT 1");
 $stmt->bindParam(':id', $id_professor);
 $stmt->execute();
@@ -152,7 +79,7 @@ if (!$prof) {
     <div class="container py-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2><i class="bi bi-person-lines-fill text-primary"></i> Editar Perfil</h2>
-            <a href="../sistema/painel.php" class="btn btn-secondary">Painel</a>
+            <a href="../painel.php" class="btn btn-secondary">Painel</a>
         </div>
 
         <?php if (isset($_SESSION['sucesso'])): ?>
@@ -171,7 +98,10 @@ if (!$prof) {
             </div>
         <?php endif; ?>
 
-        <form method="POST" enctype="multipart/form-data">
+        <form action="../../controllers/ProfessorController.php?action=update" method="POST" enctype="multipart/form-data">
+            
+            <input type="hidden" name="id" value="<?php echo $id_professor; ?>">
+
             <div class="row">
                 <div class="col-md-4 mb-4">
                     <div class="form-card text-center h-100">

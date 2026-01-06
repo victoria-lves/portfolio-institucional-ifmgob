@@ -79,14 +79,13 @@ try {
                             // 2. Lógica de tratamento da Imagem
                             if (empty($nome_arquivo)) {
                                 // CASO 1: Campo vazio -> Usa imagem padrão
-                                // Certifique-se de ter essa imagem na pasta ou ajuste o nome aqui
                                 $img = '../../assets/img/default-img-curso.webp';
                             } elseif (strpos($nome_arquivo, 'http') === 0) {
-                                // CASO 2: É um link externo (começa com http/https)
+                                // CASO 2: É um link externo
                                 $img = htmlspecialchars($nome_arquivo);
                             } else {
-                                // CASO 3: É um arquivo local -> Adiciona a pasta 'img/cursos/'
-                                $img = 'img/cursos/' . htmlspecialchars($nome_arquivo);
+                                // CASO 3: É um arquivo local
+                                $img = '../../assets/img/cursos/' . htmlspecialchars($nome_arquivo);
                             }
                             $nome = htmlspecialchars($row['nome']);
                             $id = $row['id'];

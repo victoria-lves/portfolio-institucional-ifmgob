@@ -1,34 +1,29 @@
 <?php
-// ==============================================
-// views/usuario/index.php - Lista de Usuários
-// ==============================================
 
 session_start();
 
-// Verificar se está logado e se é admin
+// 1. Verificação de Segurança (Apenas Admin)
 if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_nivel'] != 'admin') {
-    // Se não for admin, redireciona para painel ou login
-    header("Location: ../views/authlogin.php");
+    header("Location: ../auth/login.php"); // Caminho corrigido
     exit();
 }
 
 require_once '../../../config/database.php';
-// require_once '../../models/Usuario.php'; // O modelo Usuario fornecido não tem método listar, faremos via PDO direto
 
 $database = new Database();
 $db = $database->getConnection();
 
-// Buscar todos os usuários
+// 2. Buscar Usuários
 try {
     $query = "SELECT * FROM usuario ORDER BY nome ASC";
     $stmt = $db->prepare($query);
     $stmt->execute();
     $usuarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
-    $erro = "Erro ao listar usuários: " . $e->getMessage();
+    $erro_sessao = "Erro ao listar usuários: " . $e->getMessage();
 }
 
-// Estatísticas
+// 3. Calcular Estatísticas
 $total_usuarios = count($usuarios);
 $total_admins = 0;
 $total_professores = 0;
@@ -41,11 +36,10 @@ foreach ($usuarios as $user) {
     }
 }
 
-// Mensagens de Sessão
-$sucesso = isset($_SESSION['sucesso']) ? $_SESSION['sucesso'] : '';
-$erro_sessao = isset($_SESSION['erro']) ? $_SESSION['erro'] : '';
-unset($_SESSION['sucesso']);
-unset($_SESSION['erro']);
+// 4. Gerenciar Mensagens de Sessão
+$sucesso = $_SESSION['sucesso'] ?? '';
+$erro_sessao = $_SESSION['erro'] ?? ($erro_sessao ?? ''); // Pega da sessão ou do erro do try/catch
+unset($_SESSION['sucesso'], $_SESSION['erro']);
 ?>
 
 <!DOCTYPE html>
@@ -57,9 +51,7 @@ unset($_SESSION['erro']);
     <title>Gerenciar Usuários - IFMG</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
-
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
 
     <style>
@@ -80,6 +72,7 @@ unset($_SESSION['erro']);
             margin-bottom: 30px;
         }
 
+        /* Cards Estatísticos */
         .stats-card {
             background: white;
             border-radius: 10px;
@@ -88,10 +81,7 @@ unset($_SESSION['erro']);
             margin-bottom: 20px;
             transition: transform 0.3s;
         }
-
-        .stats-card:hover {
-            transform: translateY(-3px);
-        }
+        .stats-card:hover { transform: translateY(-3px); }
 
         .stats-icon {
             width: 50px;
@@ -104,34 +94,14 @@ unset($_SESSION['erro']);
             margin-right: 15px;
         }
 
-        .icon-total {
-            background: rgba(26, 41, 128, 0.1);
-            color: var(--ifmg-azul);
-        }
+        .icon-total { background: rgba(26, 41, 128, 0.1); color: var(--ifmg-azul); }
+        .icon-admin { background: rgba(220, 53, 69, 0.1); color: #dc3545; }
+        .icon-prof  { background: rgba(13, 110, 253, 0.1); color: #0d6efd; }
 
-        .icon-admin {
-            background: rgba(220, 53, 69, 0.1);
-            color: #dc3545;
-        }
+        .stats-number { font-size: 1.5rem; font-weight: 700; margin: 0; line-height: 1; }
+        .stats-label { font-size: 0.85rem; color: #6c757d; margin: 5px 0 0; }
 
-        .icon-prof {
-            background: rgba(13, 110, 253, 0.1);
-            color: #0d6efd;
-        }
-
-        .stats-number {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin: 0;
-            line-height: 1;
-        }
-
-        .stats-label {
-            font-size: 0.85rem;
-            color: #6c757d;
-            margin: 5px 0 0;
-        }
-
+        /* Tabela */
         .table-card {
             background: white;
             border-radius: 10px;
@@ -152,17 +122,9 @@ unset($_SESSION['erro']);
             font-size: 1.2rem;
         }
 
-        .badge-admin {
-            background-color: #dc3545;
-        }
-
-        .badge-professor {
-            background-color: #0d6efd;
-        }
-
-        .actions-col {
-            white-space: nowrap;
-        }
+        .badge-admin { background-color: #dc3545; }
+        .badge-professor { background-color: #0d6efd; }
+        .actions-col { white-space: nowrap; }
     </style>
 </head>
 
@@ -171,17 +133,14 @@ unset($_SESSION['erro']);
         <div class="container">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <h1 class="mb-2">
-                        <i class="bi bi-people-fill me-2"></i>
-                        Gerenciar Usuários
-                    </h1>
+                    <h1 class="h3 mb-2"><i class="bi bi-people-fill me-2"></i> Gerenciar Usuários</h1>
                     <p class="mb-0">Controle de acesso e contas do sistema</p>
                 </div>
                 <div>
                     <a href="create.php" class="btn btn-light">
                         <i class="bi bi-person-plus-fill me-1"></i> Novo Usuário
                     </a>
-                    <a href="../sistema/painel.php" class="btn btn-outline-light ms-2">
+                    <a href="../painel.php" class="btn btn-outline-light ms-2">
                         <i class="bi bi-arrow-left me-1"></i> Painel
                     </a>
                 </div>
@@ -191,17 +150,15 @@ unset($_SESSION['erro']);
 
     <div class="container">
         <?php if ($sucesso): ?>
-            <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
-                <i class="bi bi-check-circle-fill me-2"></i>
-                <?php echo $sucesso; ?>
+            <div class="alert alert-success alert-dismissible fade show mb-4">
+                <i class="bi bi-check-circle-fill me-2"></i> <?php echo $sucesso; ?>
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         <?php endif; ?>
 
         <?php if ($erro_sessao): ?>
-            <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
-                <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                <?php echo $erro_sessao; ?>
+            <div class="alert alert-danger alert-dismissible fade show mb-4">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i> <?php echo $erro_sessao; ?>
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         <?php endif; ?>
@@ -237,14 +194,14 @@ unset($_SESSION['erro']);
         </div>
 
         <div class="table-card">
-            <table id="usuariosTable" class="table table-hover table-striped">
+            <table id="usuariosTable" class="table table-hover table-striped w-100">
                 <thead>
                     <tr>
                         <th width="50">#</th>
                         <th>Nome</th>
                         <th>Email</th>
-                        <th>Nível de Acesso</th>
-                        <th width="150">Ações</th>
+                        <th>Nível</th>
+                        <th width="100" class="text-end">Ações</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -258,32 +215,28 @@ unset($_SESSION['erro']);
                             <td>
                                 <strong><?php echo htmlspecialchars($u['nome']); ?></strong>
                                 <?php if ($u['id'] == $_SESSION['usuario_id']): ?>
-                                    <span class="badge bg-secondary ms-1">Você</span>
+                                    <span class="badge bg-secondary ms-1 small">Você</span>
                                 <?php endif; ?>
                             </td>
                             <td><?php echo htmlspecialchars($u['email']); ?></td>
                             <td>
                                 <?php if ($u['nivel'] == 'admin'): ?>
-                                    <span class="badge badge-admin">
-                                        <i class="bi bi-shield-fill me-1"></i> Admin
-                                    </span>
+                                    <span class="badge badge-admin"><i class="bi bi-shield-fill me-1"></i> Admin</span>
                                 <?php else: ?>
-                                    <span class="badge badge-professor">
-                                        <i class="bi bi-person-badge me-1"></i> Professor
-                                    </span>
+                                    <span class="badge badge-professor"><i class="bi bi-person-badge me-1"></i> Professor</span>
                                 <?php endif; ?>
                             </td>
-                            <td class="actions-col">
-                                <button class="btn btn-sm btn-outline-primary" title="Editar Usuário" disabled>
+                            <td class="text-end actions-col">
+                                <button class="btn btn-sm btn-outline-secondary" title="Editar Usuário" disabled>
                                     <i class="bi bi-pencil"></i>
                                 </button>
 
-                                <?php if ($u['id'] != $_SESSION['usuario_id']): // Não pode excluir a si mesmo ?>
-                                    <form method="POST" action="../../controllers/UsuarioController.php?action=delete"
-                                        class="d-inline"
-                                        onsubmit="return confirm('Tem certeza que deseja excluir o usuário <?php echo addslashes($u['nome']); ?>? Esta ação não pode ser desfeita.');">
+                                <?php if ($u['id'] != $_SESSION['usuario_id']): ?>
+                                    <form method="POST" action="../../controllers/UsuarioController.php?action=delete" 
+                                          class="d-inline"
+                                          onsubmit="return confirm('Tem certeza que deseja excluir <?php echo addslashes($u['nome']); ?>? Se ele for professor, o perfil docente também será apagado.');">
                                         <input type="hidden" name="id" value="<?php echo $u['id']; ?>">
-                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Excluir Usuário">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Excluir">
                                             <i class="bi bi-trash"></i>
                                         </button>
                                     </form>
@@ -296,33 +249,22 @@ unset($_SESSION['erro']);
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 
     <script>
         $(document).ready(function () {
-            // Inicializar DataTables
             $('#usuariosTable').DataTable({
-                language: {
-                    url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/pt-BR.json'
-                },
+                language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/pt-BR.json' },
                 responsive: true,
                 order: [[1, 'asc']], // Ordenar por nome
                 columnDefs: [
                     { orderable: false, targets: [0, 4] } // Desabilitar ordenação em Avatar e Ações
                 ]
             });
-
-            // Inicializar tooltips
-            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
-            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-                return new bootstrap.Tooltip(tooltipTriggerEl);
-            });
         });
     </script>
 </body>
-
 </html>

@@ -1,12 +1,14 @@
 <?php
-// ==============================================
 // controllers/UsuarioController.php
-// ==============================================
 
-session_start();
+// 1. Correção: Iniciar sessão apenas se não existir
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
-require_once '../../config/database.php';
-require_once '../models/Usuario.php';
+// 2. Correção: Uso de __DIR__ para caminhos absolutos (evita erros de inclusão)
+require_once __DIR__ . '/../../config/database.php';
+require_once __DIR__ . '/../models/Usuario.php';
 
 class UsuarioController
 {
@@ -32,7 +34,12 @@ class UsuarioController
             // Sanitização básica
             $this->usuario->nome = trim($_POST['nome']);
             $this->usuario->email = trim($_POST['email']);
-            $this->usuario->senha = $_POST['senha'];
+            
+            // 3. Segurança: Criptografar a senha antes de salvar
+            // O código original salvava em texto puro, o que é inseguro.
+            $senha_plana = $_POST['senha'];
+            $this->usuario->senha = password_hash($senha_plana, PASSWORD_DEFAULT);
+            
             $this->usuario->nivel = 'professor'; // Padrão ao criar por aqui
 
             // Verificar duplicidade de email
@@ -77,11 +84,32 @@ class UsuarioController
             exit();
         }
 
-        // 4. Executar exclusão via Model
-        if ($this->usuario->delete($id_para_deletar)) {
-            $_SESSION['sucesso'] = "Usuário excluído com sucesso!";
-        } else {
-            $_SESSION['erro'] = "Erro ao excluir usuário. Verifique se ele possui vínculos.";
+        try {
+            // 4. Limpeza de Arquivos (Melhoria)
+            // Antes de deletar o usuário, verificamos se ele é um professor e se tem foto para apagar.
+            // Isso evita "lixo" na pasta de imagens, já que o CASCADE do banco apaga o registro mas não o arquivo.
+            $queryFoto = "SELECT pfp FROM professor WHERE id_usuario = :id LIMIT 1";
+            $stmtFoto = $this->db->prepare($queryFoto);
+            $stmtFoto->execute([':id' => $id_para_deletar]);
+            $professor = $stmtFoto->fetch(PDO::FETCH_ASSOC);
+
+            if ($professor && !empty($professor['pfp']) && $professor['pfp'] != 'default.webp') {
+                $caminhoFoto = __DIR__ . '/../assets/img/docentes/' . $professor['pfp'];
+                if (file_exists($caminhoFoto)) {
+                    unlink($caminhoFoto);
+                }
+            }
+
+            // 5. Executar exclusão via Model
+            // O Banco de dados fará o CASCADE apagando o registro na tabela 'professor' automaticamente
+            if ($this->usuario->delete($id_para_deletar)) {
+                $_SESSION['sucesso'] = "Usuário excluído com sucesso!";
+            } else {
+                $_SESSION['erro'] = "Erro ao excluir usuário. Verifique vínculos.";
+            }
+
+        } catch (Exception $e) {
+            $_SESSION['erro'] = "Erro: " . $e->getMessage();
         }
 
         header("Location: ../views/usuario/index.php");

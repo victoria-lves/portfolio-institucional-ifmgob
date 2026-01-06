@@ -1,14 +1,17 @@
 <?php
-// views/auth/login.php
+// ==============================================
+// views/auth/login.php - Tela de Login
+// ==============================================
+
 session_start();
 
-// Se já estiver logado, redireciona para o painel
+// 1. Redirecionamento se já estiver logado
 if (isset($_SESSION['usuario_id'])) {
     header("Location: ../sistema/painel.php");
     exit();
 }
 
-// Capturar mensagens da sessão (Flash Messages)
+// 2. Capturar Mensagens da Sessão (Flash Messages)
 $erro = '';
 $sucesso = '';
 $email_preenchido = '';
@@ -23,6 +26,7 @@ if (isset($_SESSION['logout_sucesso'])) {
     unset($_SESSION['logout_sucesso']);
 }
 
+// Recupera o e-mail digitado anteriormente em caso de erro
 if (isset($_SESSION['old_email'])) {
     $email_preenchido = htmlspecialchars($_SESSION['old_email']);
     unset($_SESSION['old_email']);
@@ -35,8 +39,6 @@ if (isset($_SESSION['old_email'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="keywords"
-        content="acesso professores IFMG Ouro Branco, atualizar descrição IFMG, sistema professores campus Ouro Branco, portal docente IFMG, login sistema acadêmico">
     <title>Login - IFMG Ouro Branco</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -61,15 +63,8 @@ if (isset($_SESSION['old_email'])) {
         }
 
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .login-card {
@@ -86,14 +81,9 @@ if (isset($_SESSION['old_email'])) {
             text-align: center;
         }
 
-        .login-header h2 {
-            margin: 0;
-            font-weight: 700;
-        }
+        .login-header h2 { margin: 0; font-weight: 700; }
 
-        .login-body {
-            padding: 40px;
-        }
+        .login-body { padding: 40px; }
 
         .form-control {
             padding: 12px 15px;
@@ -123,10 +113,7 @@ if (isset($_SESSION['old_email'])) {
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
 
-        .password-toggle {
-            cursor: pointer;
-            color: #666;
-        }
+        .password-toggle { cursor: pointer; color: #666; }
     </style>
 </head>
 
@@ -144,16 +131,14 @@ if (isset($_SESSION['old_email'])) {
 
                         <?php if ($sucesso): ?>
                             <div class="alert alert-success alert-dismissible fade show" role="alert">
-                                <i class="bi bi-check-circle-fill me-2"></i>
-                                <?php echo $sucesso; ?>
+                                <i class="bi bi-check-circle-fill me-2"></i> <?php echo $sucesso; ?>
                                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                             </div>
                         <?php endif; ?>
 
                         <?php if ($erro): ?>
                             <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                                <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                                <?php echo $erro; ?>
+                                <i class="bi bi-exclamation-triangle-fill me-2"></i> <?php echo $erro; ?>
                                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                             </div>
                         <?php endif; ?>
@@ -214,7 +199,7 @@ if (isset($_SESSION['old_email'])) {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        // Mostrar/ocultar senha
+        // Lógica de Mostrar/Ocultar Senha
         document.getElementById('togglePassword').addEventListener('click', function () {
             const passwordInput = document.getElementById('senha');
             const toggleIcon = document.getElementById('toggleIcon');
@@ -230,7 +215,7 @@ if (isset($_SESSION['old_email'])) {
             }
         });
 
-        // Efeito de loading no botão ao enviar
+        // Feedback Visual de Carregamento
         document.getElementById('loginForm').addEventListener('submit', function (e) {
             const submitBtn = this.querySelector('button[type="submit"]');
             const originalText = submitBtn.innerHTML;
@@ -238,7 +223,7 @@ if (isset($_SESSION['old_email'])) {
             submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Entrando...';
             submitBtn.disabled = true;
 
-            // Timeout de segurança caso o servidor não responda
+            // Restaura o botão após 5s caso o servidor demore (UX safety)
             setTimeout(() => {
                 submitBtn.innerHTML = originalText;
                 submitBtn.disabled = false;

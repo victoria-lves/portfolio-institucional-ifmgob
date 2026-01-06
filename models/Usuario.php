@@ -1,4 +1,6 @@
 <?php
+// models/Usuario.php
+
 class Usuario {
     private $conn;
     private $table_name = "usuario";
@@ -21,20 +23,22 @@ class Usuario {
 
         $stmt = $this->conn->prepare($query);
 
-        // Limpar dados
+        // Limpar dados (Sanitização)
         $this->nome = htmlspecialchars(strip_tags($this->nome));
         $this->email = htmlspecialchars(strip_tags($this->email));
         $this->nivel = htmlspecialchars(strip_tags($this->nivel));
         
-        // Hash da senha (Segurança)
-        $senha_hash = password_hash($this->senha, PASSWORD_DEFAULT);
+        // [CORREÇÃO] NÃO fazer hash aqui, pois o Controller já enviou a senha criptografada.
+        // Se fizer aqui de novo, a senha no banco ficará inválida.
 
         $stmt->bindParam(":nome", $this->nome);
         $stmt->bindParam(":email", $this->email);
-        $stmt->bindParam(":senha", $senha_hash);
+        $stmt->bindParam(":senha", $this->senha); // Salva o hash recebido do controller
         $stmt->bindParam(":nivel", $this->nivel);
 
         if ($stmt->execute()) {
+            // [MELHORIA] Captura o ID gerado (útil se precisar logar logo após criar)
+            $this->id = $this->conn->lastInsertId();
             return true;
         }
         return false;

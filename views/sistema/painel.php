@@ -1,12 +1,10 @@
 <?php
-// painel.php - Painel Principal
-// Local: sistema-ifmg/views/sistema/painel.php
 
 session_start();
 
 // Verificar se usuário está logado
 if (!isset($_SESSION['usuario_id'])) {
-    header("Location: auth/login.php");
+    header("Location: ../auth/login.php");
     exit();
 }
 
@@ -17,7 +15,7 @@ if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY'] > 
     session_unset();
     session_destroy();
     $_SESSION['erro'] = "Sessão expirada por inatividade. Faça login novamente.";
-    header("Location: auth/login.php");
+    header("Location: ../auth/login.php");
     exit();
 }
 $_SESSION['LAST_ACTIVITY'] = time();
@@ -517,7 +515,7 @@ unset($_SESSION['erro']);
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link" href="../views/site/menu-principal.php">
+                    <a class="nav-link" href="../site/menu-principal.php">
                         <span class="nav-icon"><i class="bi bi-eye"></i></span>
                         <span>Ver Site Público</span>
                     </a>
@@ -732,7 +730,7 @@ unset($_SESSION['erro']);
                 </div>
 
                 <div class="col-md-3">
-                    <a href="../views/site/menu-principal.php" class="action-btn">
+                    <a href="../site/menu-principal.php" class="action-btn">
                         <div class="action-icon text-info">
                             <i class="bi bi-eye"></i>
                         </div>

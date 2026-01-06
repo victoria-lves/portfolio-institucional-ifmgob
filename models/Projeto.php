@@ -1,12 +1,14 @@
 <?php
+// models/Projeto.php
+
 class Projeto {
     private $conn;
     private $table_name = "projeto";
 
-    // Propriedades do objeto
+    // Propriedades (Colunas da tabela 'projeto')
     public $id;
     public $titulo;
-    public $autor;
+    public $autor; // Nome do autor principal (texto)
     public $descricao;
     public $data_inicio;
     public $status;
@@ -24,42 +26,139 @@ class Projeto {
         $this->conn = $db;
     }
 
-    // =================================================================
-    // 1. LISTAR TODOS (Para Admin ou visão geral)
-    // =================================================================
+    // ==========================================================
+    // CRIAR (INSERT)
+    // ==========================================================
+    public function criar() {
+        $query = "INSERT INTO " . $this->table_name . "
+                (titulo, autor, descricao, data_inicio, status, data_fim, links, parceria, objetivos, resultados, area_conhecimento, alunos_envolvidos, agencia_financiadora, financiamento)
+                VALUES
+                (:titulo, :autor, :descricao, :data_inicio, :status, :data_fim, :links, :parceria, :objetivos, :resultados, :area_conhecimento, :alunos_envolvidos, :agencia_financiadora, :financiamento)";
+        
+        $stmt = $this->conn->prepare($query);
+
+        // Tratamento de dados (Sanitização básica e Nulos)
+        $this->titulo = htmlspecialchars(strip_tags($this->titulo));
+        $this->autor = htmlspecialchars(strip_tags($this->autor));
+        
+        // Campos opcionais devem ser NULL se vazios
+        $this->data_inicio = !empty($this->data_inicio) ? $this->data_inicio : null;
+        $this->data_fim = !empty($this->data_fim) ? $this->data_fim : null;
+        $this->financiamento = !empty($this->financiamento) ? $this->financiamento : null;
+
+        // Bind
+        $stmt->bindParam(":titulo", $this->titulo);
+        $stmt->bindParam(":autor", $this->autor);
+        $stmt->bindParam(":descricao", $this->descricao);
+        $stmt->bindParam(":data_inicio", $this->data_inicio);
+        $stmt->bindParam(":status", $this->status);
+        $stmt->bindParam(":data_fim", $this->data_fim);
+        $stmt->bindParam(":links", $this->links);
+        $stmt->bindParam(":parceria", $this->parceria);
+        $stmt->bindParam(":objetivos", $this->objetivos);
+        $stmt->bindParam(":resultados", $this->resultados);
+        $stmt->bindParam(":area_conhecimento", $this->area_conhecimento);
+        $stmt->bindParam(":alunos_envolvidos", $this->alunos_envolvidos);
+        $stmt->bindParam(":agencia_financiadora", $this->agencia_financiadora);
+        $stmt->bindParam(":financiamento", $this->financiamento);
+
+        if ($stmt->execute()) {
+            // Captura o ID gerado para uso no Controller (vincular professores/imagens)
+            $this->id = $this->conn->lastInsertId();
+            return true;
+        }
+        return false;
+    }
+
+    // ==========================================================
+    // ATUALIZAR (UPDATE)
+    // ==========================================================
+    public function atualizar() {
+        $query = "UPDATE " . $this->table_name . "
+                SET titulo = :titulo, 
+                    autor = :autor, 
+                    descricao = :descricao, 
+                    data_inicio = :data_inicio, 
+                    status = :status, 
+                    data_fim = :data_fim,
+                    links = :links, 
+                    parceria = :parceria, 
+                    objetivos = :objetivos,
+                    resultados = :resultados, 
+                    area_conhecimento = :area_conhecimento,
+                    alunos_envolvidos = :alunos_envolvidos, 
+                    agencia_financiadora = :agencia_financiadora,
+                    financiamento = :financiamento
+                WHERE id = :id";
+
+        $stmt = $this->conn->prepare($query);
+
+        // Tratamento de opcionais
+        $this->data_inicio = !empty($this->data_inicio) ? $this->data_inicio : null;
+        $this->data_fim = !empty($this->data_fim) ? $this->data_fim : null;
+        $this->financiamento = !empty($this->financiamento) ? $this->financiamento : null;
+
+        $stmt->bindParam(":titulo", $this->titulo);
+        $stmt->bindParam(":autor", $this->autor);
+        $stmt->bindParam(":descricao", $this->descricao);
+        $stmt->bindParam(":data_inicio", $this->data_inicio);
+        $stmt->bindParam(":status", $this->status);
+        $stmt->bindParam(":data_fim", $this->data_fim);
+        $stmt->bindParam(":links", $this->links);
+        $stmt->bindParam(":parceria", $this->parceria);
+        $stmt->bindParam(":objetivos", $this->objetivos);
+        $stmt->bindParam(":resultados", $this->resultados);
+        $stmt->bindParam(":area_conhecimento", $this->area_conhecimento);
+        $stmt->bindParam(":alunos_envolvidos", $this->alunos_envolvidos);
+        $stmt->bindParam(":agencia_financiadora", $this->agencia_financiadora);
+        $stmt->bindParam(":financiamento", $this->financiamento);
+        $stmt->bindParam(":id", $this->id);
+
+        return $stmt->execute();
+    }
+
+    // ==========================================================
+    // DELETAR (DELETE)
+    // ==========================================================
+    public function delete($id) {
+        $query = "DELETE FROM " . $this->table_name . " WHERE id = :id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':id', $id);
+        return $stmt->execute();
+    }
+
+    // ==========================================================
+    // MÉTODOS DE LEITURA
+    // ==========================================================
+    
+    // Lista todos os projetos (com os IDs dos autores concatenados para verificação rápida)
     public function listar() {
-    // Busca os dados do projeto E uma lista separada por vírgulas dos IDs dos professores (ids_autores)
-    $query = "SELECT p.*, GROUP_CONCAT(pp.id_professor) as ids_autores
-              FROM " . $this->table_name . " p
-              LEFT JOIN professor_projeto pp ON p.id = pp.id_projeto
-              GROUP BY p.id
-              ORDER BY p.data_inicio DESC";
-
-    $stmt = $this->conn->prepare($query);
-    $stmt->execute();
-    return $stmt;
-}
-
-    // =================================================================
-    // 2. LISTAR POR PROFESSOR (CORRIGIDO COM JOIN)
-    // =================================================================
-    public function listarPorProfessor($id_professor) {
-        // A QUERY FOI ALTERADA AQUI:
-        // Usamos INNER JOIN para ligar 'projeto' com 'professor_projeto'
-        $query = "SELECT p.* FROM " . $this->table_name . " p
-                  INNER JOIN professor_projeto pp ON p.id = pp.id_projeto
-                  WHERE pp.id_professor = :id
+        $query = "SELECT p.*, GROUP_CONCAT(pp.id_professor) as ids_autores
+                  FROM " . $this->table_name . " p
+                  LEFT JOIN professor_projeto pp ON p.id = pp.id_projeto
+                  GROUP BY p.id
                   ORDER BY p.data_inicio DESC";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        return $stmt;
+    }
 
+    // Lista projetos de um professor específico (usando a tabela de ligação)
+    public function listarPorProfessor($id_professor) {
+        $query = "SELECT p.*, GROUP_CONCAT(pp_todos.id_professor) as ids_autores
+                  FROM " . $this->table_name . " p
+                  INNER JOIN professor_projeto pp ON p.id = pp.id_projeto
+                  LEFT JOIN professor_projeto pp_todos ON p.id = pp_todos.id_projeto
+                  WHERE pp.id_professor = :id
+                  GROUP BY p.id
+                  ORDER BY p.data_inicio DESC";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':id', $id_professor);
         $stmt->execute();
         return $stmt;
     }
 
-    // =================================================================
-    // 3. BUSCAR POR ID
-    // =================================================================
+    // Busca um único projeto pelo ID
     public function buscarPorId($id) {
         $query = "SELECT * FROM " . $this->table_name . " WHERE id = ? LIMIT 1";
         $stmt = $this->conn->prepare($query);
@@ -85,108 +184,7 @@ class Projeto {
             $this->agencia_financiadora = $row['agencia_financiadora'];
             $this->financiamento = $row['financiamento'];
         }
-        
         return $row;
-    }
-
-    // =================================================================
-    // 4. MÉTODOS DE MANIPULAÇÃO (INSERT/UPDATE/DELETE)
-    // Geralmente são feitos direto no Controller (create.php), 
-    // mas se tiver lógica aqui, mantenha-a.
-    // =================================================================
-    
-    // Adicione isto no models/Projeto.php
-
-    public $id_professor; // Necessário definir esta propriedade
-
-    public function criar() {
-        $query = "INSERT INTO " . $this->table_name . "
-                (titulo, autor, descricao, data_inicio, status, data_fim, links, parceria, objetivos, resultados, area_conhecimento, alunos_envolvidos, agencia_financiadora, financiamento)
-                VALUES
-                (:titulo, :autor, :descricao, :data_inicio, :status, :data_fim, :links, :parceria, :objetivos, :resultados, :area_conhecimento, :alunos_envolvidos, :agencia_financiadora, :financiamento)";
-
-        // Nota: O insert na tabela de ligação (professor_projeto) deve ser feito logo após,
-        // ou precisa ajustar a query para salvar o vínculo.
-        // Vou assumir que você salvará o vínculo separadamente ou precisa de uma trigger.
-        // MAS, o mais comum no seu sistema parece ser salvar na tabela de ligação manual.
-        
-        $stmt = $this->conn->prepare($query);
-
-        // Bind dos valores
-        $stmt->bindParam(":titulo", $this->titulo);
-        $stmt->bindParam(":autor", $this->autor);
-        $stmt->bindParam(":descricao", $this->descricao);
-        $stmt->bindParam(":data_inicio", $this->data_inicio);
-        $stmt->bindParam(":status", $this->status);
-        $stmt->bindParam(":data_fim", $this->data_fim);
-        $stmt->bindParam(":links", $this->links);
-        $stmt->bindParam(":parceria", $this->parceria);
-        $stmt->bindParam(":objetivos", $this->objetivos);
-        $stmt->bindParam(":resultados", $this->resultados);
-        $stmt->bindParam(":area_conhecimento", $this->area_conhecimento);
-        $stmt->bindParam(":alunos_envolvidos", $this->alunos_envolvidos);
-        $stmt->bindParam(":agencia_financiadora", $this->agencia_financiadora);
-        $stmt->bindParam(":financiamento", $this->financiamento);
-
-        if ($stmt->execute()) {
-            $this->id = $this->conn->lastInsertId();
-
-            // === VINCULAR PROFESSOR (IMPORTANTE) ===
-            // Como seu select usa JOIN com professor_projeto, se não salvar aqui, o projeto não aparece na lista!
-            if(!empty($this->id_professor)) {
-                $queryRel = "INSERT INTO professor_projeto (id_professor, id_projeto) VALUES (:id_prof, :id_proj)";
-                $stmtRel = $this->conn->prepare($queryRel);
-                $stmtRel->bindParam(":id_prof", $this->id_professor);
-                $stmtRel->bindParam(":id_proj", $this->id);
-                $stmtRel->execute();
-            }
-            return true;
-        }
-        return false;
-    }
-
-    public function atualizar() {
-        $query = "UPDATE " . $this->table_name . "
-                SET titulo = :titulo, autor = :autor, descricao = :descricao, 
-                    data_inicio = :data_inicio, status = :status, data_fim = :data_fim,
-                    links = :links, parceria = :parceria, objetivos = :objetivos,
-                    resultados = :resultados, area_conhecimento = :area_conhecimento,
-                    alunos_envolvidos = :alunos_envolvidos, agencia_financiadora = :agencia_financiadora,
-                    financiamento = :financiamento
-                WHERE id = :id";
-
-        $stmt = $this->conn->prepare($query);
-
-        // Bind (igual ao criar, mais o ID)
-        $stmt->bindParam(":titulo", $this->titulo);
-        $stmt->bindParam(":autor", $this->autor);
-        $stmt->bindParam(":descricao", $this->descricao);
-        $stmt->bindParam(":data_inicio", $this->data_inicio);
-        $stmt->bindParam(":status", $this->status);
-        $stmt->bindParam(":data_fim", $this->data_fim);
-        $stmt->bindParam(":links", $this->links);
-        $stmt->bindParam(":parceria", $this->parceria);
-        $stmt->bindParam(":objetivos", $this->objetivos);
-        $stmt->bindParam(":resultados", $this->resultados);
-        $stmt->bindParam(":area_conhecimento", $this->area_conhecimento);
-        $stmt->bindParam(":alunos_envolvidos", $this->alunos_envolvidos);
-        $stmt->bindParam(":agencia_financiadora", $this->agencia_financiadora);
-        $stmt->bindParam(":financiamento", $this->financiamento);
-        $stmt->bindParam(":id", $this->id);
-
-        if($stmt->execute()) {
-            // Atualizar vínculo se necessário (opcional para update, mas bom ter)
-            return true;
-        }
-        return false;
-    }
-
-    // Método DELETE genérico se precisar
-    public function delete($id) {
-        $query = "DELETE FROM " . $this->table_name . " WHERE id = :id";
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':id', $id);
-        return $stmt->execute();
     }
 }
 ?>

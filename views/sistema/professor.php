@@ -21,7 +21,18 @@ if (!$dados) {
 }
 
 $producao = new Producao($db);
-$producoes = $producao->listarPorProfessor($dados['id'])->fetchAll();
+// Verifica se o método existe (compatibilidade)
+if (method_exists($producao, 'listarPorProfessor')) {
+    $stmt = $producao->listarPorProfessor($dados['id']);
+    $producoes = $stmt ? $stmt->fetchAll(PDO::FETCH_ASSOC) : [];
+} else {
+    // Fallback caso o método não exista no Model
+    $stmt = $producao->listar();
+    $todas = $stmt ? $stmt->fetchAll(PDO::FETCH_ASSOC) : [];
+    $producoes = array_filter($todas, function($p) use ($dados) {
+        return $p['id_professor'] == $dados['id'];
+    });
+}
 
 // Assumindo que a variável $professor['nome'] contém o nome do docente
 $nome_prof = htmlspecialchars($professor['nome'] ?? 'Docente');

@@ -1,100 +1,148 @@
 <?php
 // controllers/ProducaoController.php
 
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+require_once __DIR__ . '/../../config/database.php';
+require_once __DIR__ . '/../models/Producao.php';
+
 class ProducaoController
 {
-    private $conn;
+    private $db;
+    private $producao;
 
-    public function __construct($conn = null)
+    public function __construct()
     {
-        if ($conn) {
-            $this->conn = $conn;
-        } else {
-            require_once '../../config/database.php';
-            $database = new Database();
-            $this->conn = $database->getConnection();
+        $database = new Database();
+        $this->db = $database->getConnection();
+        $this->producao = new Producao($this->db);
+    }
+
+    // ==========================================================
+    // ACTION: CREATE
+    // ==========================================================
+    public function create()
+    {
+        $this->checkAuth();
+
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            try {
+                // 1. Validar Campos Obrigatórios
+                if (empty($_POST['titulo']) || empty($_POST['autor']) || empty($_POST['tipo']) || empty($_POST['idioma'])) {
+                    throw new Exception("Preencha todos os campos obrigatórios.");
+                }
+
+                // 2. Setar Dados no Model
+                $this->producao->titulo = trim($_POST['titulo']);
+                $this->producao->autor = trim($_POST['autor']);
+                $this->producao->tipo = $_POST['tipo'];
+                $this->producao->idioma = $_POST['idioma'];
+                
+                // Campos opcionais / condicionais
+                $this->producao->data_pub = !empty($_POST['data_pub']) ? $_POST['data_pub'] : null;
+                $this->producao->tipo_outro = ($_POST['tipo'] === 'Outro') ? trim($_POST['tipo_outro'] ?? '') : null;
+                $this->producao->idioma_outro = ($_POST['idioma'] === 'Outro') ? trim($_POST['idioma_outro'] ?? '') : null;
+                $this->producao->link = trim($_POST['link'] ?? '');
+
+                // Vínculo com Professor (Automático ou Selecionado pelo Admin)
+                if ($_SESSION['usuario_nivel'] == 'professor') {
+                    $this->producao->id_professor = $_SESSION['professor_id'];
+                } else {
+                    $this->producao->id_professor = !empty($_POST['id_professor']) ? $_POST['id_professor'] : null;
+                }
+
+                // 3. Salvar
+                if ($this->producao->criar()) {
+                    $_SESSION['sucesso'] = "Produção acadêmica cadastrada com sucesso!";
+                    header("Location: ../views/producao/index.php");
+                } else {
+                    throw new Exception("Erro ao salvar no banco de dados.");
+                }
+
+            } catch (Exception $e) {
+                $_SESSION['erro'] = $e->getMessage();
+                // Redireciona de volta com erro
+                header("Location: ../views/producao/create.php");
+            }
+            exit();
         }
     }
 
-    public function create($data)
+    // ==========================================================
+    // ACTION: UPDATE (Se houver edição no futuro)
+    // ==========================================================
+    public function update()
     {
-        try {
-            // Validar dados
-            $titulo = trim($data['titulo'] ?? '');
-            $autor = trim($data['autor'] ?? '');
-            $tipo = $data['tipo'] ?? '';
-            $idioma = $data['idioma'] ?? '';
+        $this->checkAuth();
 
-            if (empty($titulo) || empty($autor) || empty($tipo) || empty($idioma)) {
-                return ['success' => false, 'message' => 'Todos os campos obrigatórios devem ser preenchidos.'];
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            try {
+                $this->producao->id = $_POST['id'];
+                // ... lógica similar ao create, chamando $this->producao->atualizar()
+                // Implemente se tiver a view edit.php
+            } catch (Exception $e) {
+                $_SESSION['erro'] = $e->getMessage();
+                header("Location: ../views/producao/index.php");
             }
-
-            // Preparar dados
-            $data_pub = !empty($data['data_pub']) ? $data['data_pub'] : null;
-            $tipo_outro = ($tipo === 'Outro' && !empty($data['tipo_outro'])) ? trim($data['tipo_outro']) : null;
-            $idioma_outro = ($idioma === 'Outro' && !empty($data['idioma_outro'])) ? trim($data['idioma_outro']) : null;
-            $link = !empty($data['link']) ? trim($data['link']) : null;
-            $id_professor = !empty($data['id_professor']) ? (int) $data['id_professor'] : null;
-
-            // Validar data
-            if ($data_pub && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $data_pub)) {
-                return ['success' => false, 'message' => 'Formato de data inválido. Use AAAA-MM-DD.'];
-            }
-
-            // Inserir no banco
-            $sql = "INSERT INTO producao (titulo, autor, data_pub, tipo, tipo_outro, idioma, idioma_outro, link, id_professor) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
-            $stmt = $this->conn->prepare($sql);
-            $result = $stmt->execute([
-                $titulo,
-                $autor,
-                $data_pub,
-                $tipo,
-                $tipo_outro,
-                $idioma,
-                $idioma_outro,
-                $link,
-                $id_professor
-            ]);
-
-            if ($result) {
-                return ['success' => true, 'message' => 'Produção acadêmica cadastrada com sucesso!', 'id' => $this->conn->lastInsertId()];
-            } else {
-                return ['success' => false, 'message' => 'Erro ao cadastrar produção.'];
-            }
-
-        } catch (Exception $e) {
-            return ['success' => false, 'message' => 'Erro: ' . $e->getMessage()];
+            exit();
         }
     }
 
-    public function getProfessores()
+    // ==========================================================
+    // ACTION: DELETE
+    // ==========================================================
+    public function delete()
     {
-        try {
-            $sql = "SELECT p.id, p.nome 
-                    FROM professor p
-                    INNER JOIN usuario u ON p.id_usuario = u.id
-                    WHERE u.nivel = 'professor'
-                    ORDER BY p.nome";
+        $this->checkAuth();
 
-            $stmt = $this->conn->prepare($sql);
-            $stmt->execute();
+        if (isset($_POST['id'])) {
+            try {
+                $id = $_POST['id'];
+                
+                // Validar permissão (Apenas Admin ou o Próprio Dono)
+                if ($_SESSION['usuario_nivel'] != 'admin') {
+                    $dados = $this->producao->buscarPorId($id);
+                    if ($dados['id_professor'] != $_SESSION['professor_id']) {
+                        throw new Exception("Permissão negada.");
+                    }
+                }
 
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (PDOException $e) {
-            return [];
+                if ($this->producao->delete($id)) {
+                    $_SESSION['sucesso'] = "Registro excluído com sucesso!";
+                } else {
+                    throw new Exception("Erro ao excluir.");
+                }
+            } catch (Exception $e) {
+                $_SESSION['erro'] = $e->getMessage();
+            }
+            header("Location: ../views/producao/index.php");
+            exit();
         }
     }
 
-    public function getTipos()
-    {
-        return ['Livro', 'Artigo', 'Tese', 'Outro'];
+    private function checkAuth() {
+        if (!isset($_SESSION['usuario_id'])) {
+            header("Location: ../views/auth/login.php");
+            exit();
+        }
     }
+}
 
-    public function getIdiomas()
-    {
-        return ['Português (pt-br)', 'Inglês', 'Espanhol', 'Outro'];
+// Roteamento
+if (isset($_GET['action'])) {
+    $controller = new ProducaoController();
+    switch ($_GET['action']) {
+        case 'create':
+            $controller->create();
+            break;
+        case 'update':
+            $controller->update();
+            break;
+        case 'delete':
+            $controller->delete();
+            break;
     }
 }
 ?>

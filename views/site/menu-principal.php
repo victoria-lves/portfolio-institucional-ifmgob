@@ -38,7 +38,7 @@ session_start();
                 <a href="menu-projetos.php">Projetos</a>
 
                 <?php if (isset($_SESSION['usuario_id'])): ?>
-                    <a href="views/sistema/painel.php" class="btn-login">
+                    <a href="../sistema/painel.php" class="btn-login">
                         <i class="fa-solid fa-user"></i> Painel
                     </a>
                 <?php else: ?>

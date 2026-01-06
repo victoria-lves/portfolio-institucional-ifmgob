@@ -1,163 +1,280 @@
 <?php
 // controllers/ProjetoController.php
-session_start();
-require_once '../../config/database.php';
-require_once '../models/Projeto.php';
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// [CORREÇÃO 1] Caminho ajustado para subir apenas um nível (../)
+require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../models/Projeto.php';
+// Importante: ImageHandler para uploads seguros
+require_once __DIR__ . '/../utils/ImageHandler.php';
 
 class ProjetoController
 {
     private $db;
     private $projeto;
+    private $uploadDir;
 
     public function __construct()
     {
         $database = new Database();
         $this->db = $database->getConnection();
         $this->projeto = new Projeto($this->db);
+        $this->uploadDir = __DIR__ . '/../assets/img/projetos/';
+        
+        if (!is_dir($this->uploadDir)) {
+            mkdir($this->uploadDir, 0777, true);
+        }
     }
 
-    public function listar($apenasMeus = false)
+    // ==========================================================
+    // ACTION: CREATE
+    // ==========================================================
+    public function create()
     {
-        if ($apenasMeus && isset($_SESSION['professor_id'])) {
-            return $this->projeto->listarPorProfessor($_SESSION['professor_id']);
-        }
-        return $this->projeto->listar();
-    }
+        $this->checkAuth();
 
-    public function criar()
-    {
-        // Verificar permissão (Admin ou Professor)
-        if ($_SESSION['usuario_nivel'] != 'admin' && $_SESSION['usuario_nivel'] != 'professor') {
-            $_SESSION['erro'] = "Acesso não autorizado!";
-            header("Location: ../sistema/painel.php");
-            exit();
-        }
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            try {
+                // Iniciar Transação (ACID)
+                $this->db->beginTransaction();
 
-        // Se for professor, verificar se tem perfil
-        if ($_SESSION['usuario_nivel'] == 'professor' && !isset($_SESSION['professor_id'])) {
-            $_SESSION['erro'] = "Complete seu perfil primeiro!";
-            header("Location: ../views/professor/create.php?completar=1");
-            exit();
-        }
-
-        if ($_POST) {
-            // Definir ID do Professor
-            if ($_SESSION['usuario_nivel'] == 'admin') {
-                if (empty($_POST['id_professor'])) {
-                    $_SESSION['erro'] = "Selecione um professor responsável!";
-                    header("Location: ../views/projeto/create.php");
-                    exit();
+                // 1. Validação Básica
+                if (empty($_POST['titulo']) || empty($_POST['descricao']) || empty($_POST['area_conhecimento'])) {
+                    throw new Exception("Preencha os campos obrigatórios (Título, Área e Descrição).");
                 }
-                $this->projeto->id_professor = $_POST['id_professor'];
-            } else {
-                $this->projeto->id_professor = $_SESSION['professor_id'];
-            }
 
-            $this->projeto->titulo = $_POST['titulo'];
-            $this->projeto->autor = $_POST['autor'];
-            $this->projeto->descricao = $_POST['descricao'];
-            $this->projeto->data_inicio = $_POST['data_inicio'];
-            $this->projeto->status = $_POST['status'];
-            $this->projeto->data_fim = !empty($_POST['data_fim']) ? $_POST['data_fim'] : null;
-            $this->projeto->links = $_POST['links'];
-            $this->projeto->parceria = $_POST['parceria'];
-            $this->projeto->objetivos = $_POST['objetivos'];
-            $this->projeto->resultados = $_POST['resultados'];
-            $this->projeto->area_conhecimento = $_POST['area_conhecimento'];
-            $this->projeto->alunos_envolvidos = $_POST['alunos_envolvidos'];
-            $this->projeto->agencia_financiadora = $_POST['agencia_financiadora'];
-            $this->projeto->financiamento = !empty($_POST['financiamento']) ? $_POST['financiamento'] : null;
+                // 2. Preparar Autores (Professores)
+                $ids_professores = $_POST['professores'] ?? [];
+                
+                // Se for professor logado, garante que ele está incluído
+                if ($_SESSION['usuario_nivel'] == 'professor' && !in_array($_SESSION['professor_id'], $ids_professores)) {
+                    array_unshift($ids_professores, $_SESSION['professor_id']);
+                }
 
-            // Processar Imagens (simplificado para o exemplo, ideal manter a lógica do view original ou mover para cá)
-            // Nota: No código original do view create.php, a lógica de imagem estava lá. 
-            // Se movermos para cá, precisaríamos refatorar. Por compatibilidade, 
-            // vou manter a criação básica aqui e deixar o upload no view ou assumir que o model trata.
-            // *Para este exemplo, assumimos que o create.php faz o insert direto como estava antes 
-            // ou que este controller é chamado pelo form.* // CORREÇÃO: O create.php original fazia o INSERT direto. 
-            // Vou manter o padrão MVC sugerido aqui, chamando o model.
+                if (empty($ids_professores)) {
+                    throw new Exception("Selecione pelo menos um professor autor.");
+                }
 
-            if ($this->projeto->criar()) {
-                // Recuperar ID para salvar imagens se necessário
-                $projeto_id = $this->db->lastInsertId();
+                // 3. Setar dados no Model
+                $this->projeto->titulo = $_POST['titulo'];
+                $this->projeto->autor = $_POST['autor'];
+                $this->projeto->descricao = $_POST['descricao'];
+                $this->projeto->data_inicio = !empty($_POST['data_inicio']) ? $_POST['data_inicio'] : null;
+                $this->projeto->status = $_POST['status'];
+                $this->projeto->data_fim = !empty($_POST['data_fim']) ? $_POST['data_fim'] : null;
+                $this->projeto->links = $_POST['links'] ?? null;
+                $this->projeto->parceria = $_POST['parceria'] ?? null;
+                $this->projeto->objetivos = $_POST['objetivos'] ?? null;
+                $this->projeto->resultados = $_POST['resultados'] ?? null;
+                $this->projeto->area_conhecimento = $_POST['area_conhecimento'];
+                $this->projeto->alunos_envolvidos = $_POST['alunos_envolvidos'] ?? null;
+                $this->projeto->agencia_financiadora = $_POST['agencia_financiadora'] ?? null;
+                $this->projeto->financiamento = !empty($_POST['financiamento']) ? str_replace(',', '.', $_POST['financiamento']) : null;
 
-                // Lógica de upload de imagens movida para cá ou mantida no arquivo se não usar rota
-                // Para simplificar, vamos redirecionar para sucesso
+                // 4. Salvar Projeto
+                if (!$this->projeto->criar()) {
+                    throw new Exception("Erro ao salvar dados do projeto.");
+                }
 
+                $id_projeto = $this->projeto->id;
+
+                // 5. Vincular Professores (Tabela de Ligação)
+                $stmtVinculo = $this->db->prepare("INSERT INTO professor_projeto (id_professor, id_projeto) VALUES (?, ?)");
+                foreach ($ids_professores as $id_prof) {
+                    $stmtVinculo->execute([$id_prof, $id_projeto]);
+                }
+
+                // 6. Upload de Imagem (Capa)
+                if (isset($_FILES['imagem']) && $_FILES['imagem']['error'] === UPLOAD_ERR_OK) {
+                    $novoNome = uniqid('proj_') . '.webp';
+                    
+                    if (ImageHandler::resizeAndSave($_FILES['imagem'], $this->uploadDir, $novoNome, 1024)) {
+                        $stmtImg = $this->db->prepare("INSERT INTO imagens (caminho, id_projeto, legenda) VALUES (?, ?, 'Capa')");
+                        $stmtImg->execute([$novoNome, $id_projeto]);
+                    }
+                }
+
+                // Confirmar Transação
+                $this->db->commit();
+                
                 $_SESSION['sucesso'] = "Projeto criado com sucesso!";
-                header("Location: ../views/projeto/index.php");
+                header("Location: ../views/sistema/projeto.php");
                 exit();
-            } else {
-                $_SESSION['erro'] = "Erro ao criar projeto!";
+
+            } catch (Exception $e) {
+                if ($this->db->inTransaction()) {
+                    $this->db->rollBack();
+                }
+                $_SESSION['erro'] = "Erro: " . $e->getMessage();
                 header("Location: ../views/projeto/create.php");
                 exit();
             }
         }
     }
 
-    public function atualizar()
+    // ==========================================================
+    // ACTION: UPDATE
+    // ==========================================================
+    public function update()
     {
-        // Verificar permissão
-        if (!isset($_POST['id'])) {
-            header("Location: ../views/projeto/index.php");
-            exit();
-        }
+        $this->checkAuth();
 
-        $this->projeto->id = $_POST['id'];
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            try {
+                $id_projeto = $_POST['id'];
+                if (!$id_projeto) throw new Exception("ID do projeto inválido.");
 
-        // Verificar propriedade do projeto (se não for admin)
-        if ($_SESSION['usuario_nivel'] != 'admin') {
-            $projetoAtual = $this->projeto->buscarPorId($_POST['id']);
-            if ($projetoAtual['id_professor'] != $_SESSION['professor_id']) {
-                $_SESSION['erro'] = "Você não tem permissão para editar este projeto!";
-                header("Location: ../views/projeto/index.php");
-                exit();
-            }
-        }
+                // Validar Permissão de Edição
+                if ($_SESSION['usuario_nivel'] != 'admin') {
+                    $stmtAuth = $this->db->prepare("SELECT COUNT(*) FROM professor_projeto WHERE id_projeto = ? AND id_professor = ?");
+                    $stmtAuth->execute([$id_projeto, $_SESSION['professor_id']]);
+                    if ($stmtAuth->fetchColumn() == 0) {
+                        throw new Exception("Você não tem permissão para editar este projeto.");
+                    }
+                }
 
-        if ($_POST) {
-            $this->projeto->titulo = $_POST['titulo'];
-            $this->projeto->autor = $_POST['autor'];
-            $this->projeto->descricao = $_POST['descricao'];
-            $this->projeto->data_inicio = $_POST['data_inicio'];
-            $this->projeto->status = $_POST['status'];
-            $this->projeto->data_fim = !empty($_POST['data_fim']) ? $_POST['data_fim'] : null;
-            $this->projeto->links = $_POST['links'];
-            $this->projeto->parceria = $_POST['parceria'];
-            $this->projeto->objetivos = $_POST['objetivos'];
-            $this->projeto->resultados = $_POST['resultados'];
-            $this->projeto->area_conhecimento = $_POST['area_conhecimento'];
-            $this->projeto->alunos_envolvidos = $_POST['alunos_envolvidos'];
-            $this->projeto->agencia_financiadora = $_POST['agencia_financiadora'];
-            $this->projeto->financiamento = !empty($_POST['financiamento']) ? $_POST['financiamento'] : null;
+                $this->db->beginTransaction();
 
-            // Admin pode mudar o dono do projeto
-            if ($_SESSION['usuario_nivel'] == 'admin' && isset($_POST['id_professor'])) {
-                $this->projeto->id_professor = $_POST['id_professor'];
-            } else {
-                // Mantém o dono atual se não for admin ou não enviado
-                $projetoAtual = $this->projeto->buscarPorId($_POST['id']);
-                $this->projeto->id_professor = $projetoAtual['id_professor'];
-            }
+                // 1. Atualizar Dados
+                $this->projeto->id = $id_projeto;
+                $this->projeto->titulo = $_POST['titulo'];
+                $this->projeto->autor = $_POST['autor'];
+                $this->projeto->descricao = $_POST['descricao'];
+                $this->projeto->data_inicio = !empty($_POST['data_inicio']) ? $_POST['data_inicio'] : null;
+                $this->projeto->status = $_POST['status'];
+                $this->projeto->data_fim = !empty($_POST['data_fim']) ? $_POST['data_fim'] : null;
+                $this->projeto->links = $_POST['links'] ?? null;
+                $this->projeto->parceria = $_POST['parceria'] ?? null;
+                $this->projeto->objetivos = $_POST['objetivos'] ?? null;
+                $this->projeto->resultados = $_POST['resultados'] ?? null;
+                $this->projeto->area_conhecimento = $_POST['area_conhecimento'];
+                $this->projeto->alunos_envolvidos = $_POST['alunos_envolvidos'] ?? null;
+                $this->projeto->agencia_financiadora = $_POST['agencia_financiadora'] ?? null;
+                $this->projeto->financiamento = !empty($_POST['financiamento']) ? str_replace(',', '.', $_POST['financiamento']) : null;
 
-            if ($this->projeto->atualizar()) { // Assumindo que existe método atualizar no Model
+                if (!$this->projeto->atualizar()) {
+                    throw new Exception("Falha ao atualizar tabela de projetos.");
+                }
+
+                // 2. Atualizar Autores
+                $ids_professores = $_POST['professores'] ?? [];
+                if ($_SESSION['usuario_nivel'] == 'professor' && !in_array($_SESSION['professor_id'], $ids_professores)) {
+                    $ids_professores[] = $_SESSION['professor_id'];
+                }
+
+                if (empty($ids_professores)) throw new Exception("O projeto deve ter pelo menos um autor.");
+
+                $stmtDel = $this->db->prepare("DELETE FROM professor_projeto WHERE id_projeto = ?");
+                $stmtDel->execute([$id_projeto]);
+
+                $stmtIns = $this->db->prepare("INSERT INTO professor_projeto (id_professor, id_projeto) VALUES (?, ?)");
+                foreach ($ids_professores as $id_prof) {
+                    $stmtIns->execute([$id_prof, $id_projeto]);
+                }
+
+                // 3. Upload de Nova Imagem
+                if (isset($_FILES['imagem']) && $_FILES['imagem']['error'] === UPLOAD_ERR_OK) {
+                    $novoNome = uniqid('proj_') . '.webp';
+                    if (ImageHandler::resizeAndSave($_FILES['imagem'], $this->uploadDir, $novoNome, 1024)) {
+                        $stmtImg = $this->db->prepare("INSERT INTO imagens (caminho, id_projeto, legenda) VALUES (?, ?, 'Capa')");
+                        $stmtImg->execute([$novoNome, $id_projeto]);
+                    }
+                }
+
+                $this->db->commit();
                 $_SESSION['sucesso'] = "Projeto atualizado com sucesso!";
-                header("Location: ../views/projeto/index.php");
+                header("Location: ../views/projeto/edit.php?id=" . $id_projeto);
                 exit();
-            } else {
-                $_SESSION['erro'] = "Erro ao atualizar projeto!";
+
+            } catch (Exception $e) {
+                if ($this->db->inTransaction()) $this->db->rollBack();
+                $_SESSION['erro'] = $e->getMessage();
                 header("Location: ../views/projeto/edit.php?id=" . $_POST['id']);
                 exit();
             }
         }
     }
+
+    // ==========================================================
+    // ACTION: DELETE
+    // ==========================================================
+    public function delete()
+    {
+        $this->checkAuth();
+
+        if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['id'])) {
+            $id = $_POST['id'];
+
+            try {
+                // [CORREÇÃO 2] Verificação de Permissão: Admin OU Dono do projeto
+                $pode_deletar = false;
+                if ($_SESSION['usuario_nivel'] == 'admin') {
+                    $pode_deletar = true;
+                } else {
+                    // Verifica se o professor logado é um dos autores
+                    $stmtCheck = $this->db->prepare("SELECT COUNT(*) FROM professor_projeto WHERE id_projeto = ? AND id_professor = ?");
+                    $stmtCheck->execute([$id, $_SESSION['professor_id']]);
+                    if ($stmtCheck->fetchColumn() > 0) {
+                        $pode_deletar = true;
+                    }
+                }
+
+                if (!$pode_deletar) {
+                    throw new Exception("Permissão negada. Você não pode excluir este projeto.");
+                }
+
+                // 1. Buscar imagens para remover arquivos físicos
+                $stmtImgs = $this->db->prepare("SELECT caminho FROM imagens WHERE id_projeto = ?");
+                $stmtImgs->execute([$id]);
+                $imagens = $stmtImgs->fetchAll(PDO::FETCH_COLUMN);
+
+                // 2. Excluir do Banco (CASCADE cuida das tabelas relacionadas)
+                if ($this->projeto->delete($id)) {
+                    // 3. Remover arquivos físicos
+                    foreach ($imagens as $arquivo) {
+                        $caminhoCompleto = $this->uploadDir . $arquivo;
+                        if (file_exists($caminhoCompleto)) {
+                            unlink($caminhoCompleto);
+                        }
+                    }
+                    $_SESSION['sucesso'] = "Projeto excluído permanentemente!";
+                } else {
+                    throw new Exception("Erro ao excluir o projeto do banco de dados.");
+                }
+
+            } catch (Exception $e) {
+                $_SESSION['erro'] = "Erro: " . $e->getMessage();
+            }
+
+            header("Location: ../views/projeto/index.php");
+            exit();
+        }
+        
+        header("Location: ../views/projeto/index.php");
+        exit();
+    }
+
+    private function checkAuth() {
+        if (!isset($_SESSION['usuario_id'])) {
+            header("Location: ../views/auth/login.php");
+            exit();
+        }
+        if ($_SESSION['usuario_nivel'] == 'professor' && !isset($_SESSION['professor_id'])) {
+            $_SESSION['erro'] = "Complete seu perfil antes de gerenciar projetos.";
+            header("Location: ../views/professor/create.php?completar=1");
+            exit();
+        }
+    }
 }
 
-// Roteamento Simples
+// Roteamento
 if (isset($_GET['action'])) {
     $controller = new ProjetoController();
-    if ($_GET['action'] == 'create')
-        $controller->criar();
-    if ($_GET['action'] == 'update')
-        $controller->atualizar();
+    if ($_GET['action'] == 'create') $controller->create();
+    if ($_GET['action'] == 'update') $controller->update();
+    if ($_GET['action'] == 'delete') $controller->delete();
 }
 ?>
