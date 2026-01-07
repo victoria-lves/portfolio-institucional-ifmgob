@@ -2,10 +2,10 @@
 // Define a classe 'Database' que gerencia a conexão com o banco de dados
 class Database {
     // Define propriedades privadas para as credenciais (encapsulamento)
-    private $host = "localhost";      // O endereço do servidor de banco de dados
-    private $db_name = "sistema_ifmg"; // O nome do banco de dados específico
-    private $username = "root";       // O usuário do banco (padrão em servidores locais)
-    private $password = "root";       // A senha do banco
+    private $host = "127.0.0.1";      // O endereço do servidor de banco de dados
+    private $db_name = "tcc_portfolio"; // O nome do banco de dados específico
+    private $username = "tcc_portfolio";       // O usuário do banco (padrão em servidores locais)
+    private $password = "c84Wh%0";       // A senha do banco
     public $conn;                     // A propriedade pública que armazena a conexão ativa
 
     // Define o método público responsável por estabelecer a conexão
