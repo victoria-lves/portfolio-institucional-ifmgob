@@ -16,19 +16,12 @@ $database = new Database();
 $db = $database->getConnection();
 $producao = new Producao($db);
 
-// Verificar se é para mostrar apenas as produções do professor
 $minhas_producoes = isset($_GET['meus']) && $_SESSION['usuario_nivel'] == 'professor';
 
 // Buscar produções
 if ($minhas_producoes && isset($_SESSION['professor_id'])) {
     // Professor vê apenas suas produções
-    $stmt = $producao->listarPorProfessor($_SESSION['professor_id']); // Certifique-se que este método existe no Model Producao!
-    // Se não existir, use um filtro no listar() normal ou adicione o método no Model.
-    // Como o Model Producao refatorado anteriormente não tinha listarPorProfessor, 
-    // vou assumir o listar() padrão e filtrar aqui ou você deve adicionar o método no Model.
-    // Para garantir, vamos usar listar() e filtrar no PHP se o método não existir, 
-    // mas o ideal é ter no Model. Vou manter como estava no seu código original supondo que você adicionou.
-    // CASO CONTRÁRIO: $stmt = $producao->listar(); e filtrar no foreach.
+    $stmt = $producao->listarPorProfessor($_SESSION['professor_id']);
     $producoes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } else {
     // Admin vê todas, ou listagem geral
@@ -36,13 +29,12 @@ if ($minhas_producoes && isset($_SESSION['professor_id'])) {
     $producoes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
-// Se o método listarPorProfessor não existir no Model, filtrar manualmente (Fallback)
 if ($minhas_producoes && empty($producoes)) {
-     $stmt = $producao->listar();
-     $todas = $stmt->fetchAll(PDO::FETCH_ASSOC);
-     $producoes = array_filter($todas, function($p) {
-         return $p['id_professor'] == $_SESSION['professor_id'];
-     });
+    $stmt = $producao->listar();
+    $todas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $producoes = array_filter($todas, function ($p) {
+        return $p['id_professor'] == $_SESSION['professor_id'];
+    });
 }
 
 // Estatísticas
@@ -54,10 +46,18 @@ $total_outros = 0;
 
 foreach ($producoes as $prod) {
     switch ($prod['tipo']) {
-        case 'Artigo': $total_artigos++; break;
-        case 'Livro': $total_livros++; break;
-        case 'Tese': $total_teses++; break;
-        default: $total_outros++; break;
+        case 'Artigo':
+            $total_artigos++;
+            break;
+        case 'Livro':
+            $total_livros++;
+            break;
+        case 'Tese':
+            $total_teses++;
+            break;
+        default:
+            $total_outros++;
+            break;
     }
 }
 
@@ -78,51 +78,278 @@ unset($_SESSION['sucesso'], $_SESSION['erro']);
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta3/dist/css/bootstrap-select.min.css">
+    <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta3/dist/css/bootstrap-select.min.css">
 
     <style>
-        :root { --ifmg-azul: #1a2980; --ifmg-verde: #26d0ce; --ifmg-laranja: #ff6b35; }
-        body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .page-header { background: linear-gradient(90deg, var(--ifmg-azul) 0%, var(--ifmg-verde) 100%); color: white; padding: 30px 0; margin-bottom: 30px; }
-        .stats-card { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05); margin-bottom: 20px; transition: transform 0.3s; }
-        .stats-card:hover { transform: translateY(-3px); }
-        .stats-icon { width: 60px; height: 60px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin-right: 15px; }
-        .icon-total { background: rgba(26, 41, 128, 0.1); color: var(--ifmg-azul); }
-        .icon-artigo { background: rgba(40, 167, 69, 0.1); color: #28a745; }
-        .icon-livro { background: rgba(255, 107, 53, 0.1); color: var(--ifmg-laranja); }
-        .icon-tese { background: rgba(23, 162, 184, 0.1); color: #17a2b8; }
-        .stats-number { font-size: 1.8rem; font-weight: 700; margin: 0; line-height: 1; }
-        .stats-label { font-size: 0.85rem; color: #6c757d; margin: 5px 0 0; }
-        .producao-card { background: white; border-radius: 10px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05); transition: all 0.3s; overflow: hidden; height: 100%; border-left: 5px solid; position: relative; }
-        .producao-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); }
-        .producao-card[data-type="Artigo"] { border-left-color: #28a745; }
-        .producao-card[data-type="Livro"] { border-left-color: var(--ifmg-laranja); }
-        .producao-card[data-type="Tese"] { border-left-color: #17a2b8; }
-        .producao-card[data-type="Outro"] { border-left-color: #6c757d; }
-        .producao-body { padding: 20px; }
-        .producao-type { position: absolute; top: 20px; right: 20px; font-size: 0.75rem; font-weight: 600; padding: 4px 10px; border-radius: 15px; background: #f8f9fa; color: #6c757d; }
-        .producao-titulo { font-weight: 600; margin-bottom: 10px; font-size: 1.1rem; color: #343a40; padding-right: 80px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        .producao-meta { font-size: 0.85rem; color: #6c757d; margin-bottom: 5px; display: flex; align-items: center; }
-        .producao-meta i { margin-right: 8px; width: 16px; }
-        .producao-footer { border-top: 1px solid #e9ecef; padding: 15px 20px; background: #f8f9fa; display: flex; justify-content: space-between; align-items: center; }
-        .empty-state { text-align: center; padding: 60px 20px; color: #6c757d; }
-        .empty-state-icon { font-size: 4rem; color: #dee2e6; margin-bottom: 20px; }
-        .filter-bar { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05); margin-bottom: 25px; }
-        .view-toggle { display: flex; gap: 10px; }
-        .view-btn { padding: 8px 20px; border: 2px solid #dee2e6; background: white; border-radius: 8px; color: #6c757d; transition: all 0.3s; }
-        .view-btn.active { border-color: var(--ifmg-azul); background: var(--ifmg-azul); color: white; }
-        .search-box { position: relative; }
-        .search-box input { padding-left: 40px; }
-        .search-box i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #6c757d; }
-        .table-producoes { background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05); }
-        .table-producoes th { background: #f8f9fa; border-bottom: 2px solid #dee2e6; font-weight: 600; color: #495057; padding: 15px; }
-        .table-producoes td { padding: 15px; vertical-align: middle; }
-        .badge-tipo { font-size: 0.8rem; padding: 5px 10px; }
-        .badge-artigo { background-color: rgba(40, 167, 69, 0.1); color: #28a745; }
-        .badge-livro { background-color: rgba(255, 107, 53, 0.1); color: var(--ifmg-laranja); }
-        .badge-tese { background-color: rgba(23, 162, 184, 0.1); color: #17a2b8; }
-        .badge-outro { background-color: rgba(108, 117, 125, 0.1); color: #6c757d; }
-        @media (max-width: 768px) { .view-toggle { justify-content: center; margin-bottom: 15px; } .search-box { margin-bottom: 15px; } }
+        :root {
+            --ifmg-azul: #1a2980;
+            --ifmg-verde: #26d0ce;
+            --ifmg-laranja: #ff6b35;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .page-header {
+            background: linear-gradient(90deg, var(--ifmg-azul) 0%, var(--ifmg-verde) 100%);
+            color: white;
+            padding: 30px 0;
+            margin-bottom: 30px;
+        }
+
+        .stats-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+            transition: transform 0.3s;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .stats-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin-right: 15px;
+        }
+
+        .icon-total {
+            background: rgba(26, 41, 128, 0.1);
+            color: var(--ifmg-azul);
+        }
+
+        .icon-artigo {
+            background: rgba(40, 167, 69, 0.1);
+            color: #28a745;
+        }
+
+        .icon-livro {
+            background: rgba(255, 107, 53, 0.1);
+            color: var(--ifmg-laranja);
+        }
+
+        .icon-tese {
+            background: rgba(23, 162, 184, 0.1);
+            color: #17a2b8;
+        }
+
+        .stats-number {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 0;
+            line-height: 1;
+        }
+
+        .stats-label {
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin: 5px 0 0;
+        }
+
+        .producao-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s;
+            overflow: hidden;
+            height: 100%;
+            border-left: 5px solid;
+            position: relative;
+        }
+
+        .producao-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .producao-card[data-type="Artigo"] {
+            border-left-color: #28a745;
+        }
+
+        .producao-card[data-type="Livro"] {
+            border-left-color: var(--ifmg-laranja);
+        }
+
+        .producao-card[data-type="Tese"] {
+            border-left-color: #17a2b8;
+        }
+
+        .producao-card[data-type="Outro"] {
+            border-left-color: #6c757d;
+        }
+
+        .producao-body {
+            padding: 20px;
+        }
+
+        .producao-type {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 15px;
+            background: #f8f9fa;
+            color: #6c757d;
+        }
+
+        .producao-titulo {
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+            color: #343a40;
+            padding-right: 80px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .producao-meta {
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+        }
+
+        .producao-meta i {
+            margin-right: 8px;
+            width: 16px;
+        }
+
+        .producao-footer {
+            border-top: 1px solid #e9ecef;
+            padding: 15px 20px;
+            background: #f8f9fa;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            color: #dee2e6;
+            margin-bottom: 20px;
+        }
+
+        .filter-bar {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 25px;
+        }
+
+        .view-toggle {
+            display: flex;
+            gap: 10px;
+        }
+
+        .view-btn {
+            padding: 8px 20px;
+            border: 2px solid #dee2e6;
+            background: white;
+            border-radius: 8px;
+            color: #6c757d;
+            transition: all 0.3s;
+        }
+
+        .view-btn.active {
+            border-color: var(--ifmg-azul);
+            background: var(--ifmg-azul);
+            color: white;
+        }
+
+        .search-box {
+            position: relative;
+        }
+
+        .search-box input {
+            padding-left: 40px;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+        }
+
+        .table-producoes {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .table-producoes th {
+            background: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+            font-weight: 600;
+            color: #495057;
+            padding: 15px;
+        }
+
+        .table-producoes td {
+            padding: 15px;
+            vertical-align: middle;
+        }
+
+        .badge-tipo {
+            font-size: 0.8rem;
+            padding: 5px 10px;
+        }
+
+        .badge-artigo {
+            background-color: rgba(40, 167, 69, 0.1);
+            color: #28a745;
+        }
+
+        .badge-livro {
+            background-color: rgba(255, 107, 53, 0.1);
+            color: var(--ifmg-laranja);
+        }
+
+        .badge-tese {
+            background-color: rgba(23, 162, 184, 0.1);
+            color: #17a2b8;
+        }
+
+        .badge-outro {
+            background-color: rgba(108, 117, 125, 0.1);
+            color: #6c757d;
+        }
+
+        @media (max-width: 768px) {
+            .view-toggle {
+                justify-content: center;
+                margin-bottom: 15px;
+            }
+
+            .search-box {
+                margin-bottom: 15px;
+            }
+        }
     </style>
 </head>
 
@@ -142,7 +369,8 @@ unset($_SESSION['sucesso'], $_SESSION['erro']);
                 </div>
                 <div>
                     <a href="create.php" class="btn btn-light"><i class="bi bi-plus-circle me-1"></i> Nova Produção</a>
-                    <a href="../painel.php" class="btn btn-outline-light ms-2"><i class="bi bi-arrow-left me-1"></i> Painel</a>
+                    <a href="../painel.php" class="btn btn-outline-light ms-2"><i class="bi bi-arrow-left me-1"></i>
+                        Painel</a>
                 </div>
             </div>
         </div>
@@ -164,10 +392,50 @@ unset($_SESSION['sucesso'], $_SESSION['erro']);
         <?php endif; ?>
 
         <div class="row">
-            <div class="col-xl-3 col-md-6"><div class="stats-card"><div class="d-flex align-items-center"><div class="stats-icon icon-total"><i class="bi bi-journal-bookmark"></i></div><div><p class="stats-number"><?php echo $total_producoes; ?></p><p class="stats-label">Total</p></div></div></div></div>
-            <div class="col-xl-3 col-md-6"><div class="stats-card"><div class="d-flex align-items-center"><div class="stats-icon icon-artigo"><i class="bi bi-file-text"></i></div><div><p class="stats-number"><?php echo $total_artigos; ?></p><p class="stats-label">Artigos</p></div></div></div></div>
-            <div class="col-xl-3 col-md-6"><div class="stats-card"><div class="d-flex align-items-center"><div class="stats-icon icon-livro"><i class="bi bi-book"></i></div><div><p class="stats-number"><?php echo $total_livros; ?></p><p class="stats-label">Livros</p></div></div></div></div>
-            <div class="col-xl-3 col-md-6"><div class="stats-card"><div class="d-flex align-items-center"><div class="stats-icon icon-tese"><i class="bi bi-mortarboard"></i></div><div><p class="stats-number"><?php echo $total_teses; ?></p><p class="stats-label">Teses</p></div></div></div></div>
+            <div class="col-xl-3 col-md-6">
+                <div class="stats-card">
+                    <div class="d-flex align-items-center">
+                        <div class="stats-icon icon-total"><i class="bi bi-journal-bookmark"></i></div>
+                        <div>
+                            <p class="stats-number"><?php echo $total_producoes; ?></p>
+                            <p class="stats-label">Total</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="stats-card">
+                    <div class="d-flex align-items-center">
+                        <div class="stats-icon icon-artigo"><i class="bi bi-file-text"></i></div>
+                        <div>
+                            <p class="stats-number"><?php echo $total_artigos; ?></p>
+                            <p class="stats-label">Artigos</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="stats-card">
+                    <div class="d-flex align-items-center">
+                        <div class="stats-icon icon-livro"><i class="bi bi-book"></i></div>
+                        <div>
+                            <p class="stats-number"><?php echo $total_livros; ?></p>
+                            <p class="stats-label">Livros</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="stats-card">
+                    <div class="d-flex align-items-center">
+                        <div class="stats-icon icon-tese"><i class="bi bi-mortarboard"></i></div>
+                        <div>
+                            <p class="stats-number"><?php echo $total_teses; ?></p>
+                            <p class="stats-label">Teses</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="filter-bar">
@@ -181,17 +449,9 @@ unset($_SESSION['sucesso'], $_SESSION['erro']);
                 <div class="col-md-5 mb-3 mb-md-0">
                     <div class="search-box">
                         <i class="bi bi-search"></i>
-                        <input type="text" class="form-control" id="searchInput" placeholder="Buscar por título, autor...">
+                        <input type="text" class="form-control" id="searchInput"
+                            placeholder="Buscar por título, autor...">
                     </div>
-                </div>
-                <div class="col-md-4">
-                    <select class="form-select filter-select" id="filterTipo">
-                        <option value="">Todos os tipos</option>
-                        <option value="Artigo">Artigos</option>
-                        <option value="Livro">Livros</option>
-                        <option value="Tese">Teses</option>
-                        <option value="Outro">Outros</option>
-                    </select>
                 </div>
             </div>
         </div>
@@ -201,14 +461,15 @@ unset($_SESSION['sucesso'], $_SESSION['erro']);
                 <div class="empty-state">
                     <div class="empty-state-icon"><i class="bi bi-journal-x"></i></div>
                     <h4>Nenhuma produção encontrada</h4>
-                    <a href="create.php" class="btn btn-primary"><i class="bi bi-plus-circle me-2"></i> Cadastrar Primeira</a>
+                    <a href="create.php" class="btn btn-primary"><i class="bi bi-plus-circle me-2"></i> Cadastrar
+                        Primeira</a>
                 </div>
             <?php else: ?>
                 <div class="row" id="producaoGrid">
                     <?php foreach ($producoes as $prod):
                         $data_pub = $prod['data_pub'] ? date('d/m/Y', strtotime($prod['data_pub'])) : 'Data n/a';
                         $tipo_display = ($prod['tipo'] == 'Outro' && !empty($prod['tipo_outro'])) ? $prod['tipo_outro'] : $prod['tipo'];
-                    ?>
+                        ?>
                         <div class="col-xl-4 col-lg-6 mb-4 producao-item" data-tipo="<?php echo $prod['tipo']; ?>"
                             data-titulo="<?php echo htmlspecialchars(strtolower($prod['titulo'])); ?>"
                             data-autor="<?php echo htmlspecialchars(strtolower($prod['autor'])); ?>">
@@ -216,21 +477,35 @@ unset($_SESSION['sucesso'], $_SESSION['erro']);
                                 <div class="producao-body">
                                     <span class="producao-type"><?php echo htmlspecialchars($tipo_display); ?></span>
                                     <h5 class="producao-titulo"><?php echo htmlspecialchars($prod['titulo']); ?></h5>
-                                    <div class="producao-meta"><i class="bi bi-person"></i><span><?php echo htmlspecialchars($prod['autor']); ?></span></div>
-                                    <div class="producao-meta"><i class="bi bi-calendar"></i><span><?php echo $data_pub; ?></span></div>
-                                    <div class="producao-meta"><i class="bi bi-translate"></i><span><?php echo htmlspecialchars($prod['idioma']); ?></span></div>
+                                    <div class="producao-meta"><i
+                                            class="bi bi-person"></i><span><?php echo htmlspecialchars($prod['autor']); ?></span>
+                                    </div>
+                                    <div class="producao-meta"><i
+                                            class="bi bi-calendar"></i><span><?php echo $data_pub; ?></span></div>
+                                    <div class="producao-meta"><i
+                                            class="bi bi-translate"></i><span><?php echo htmlspecialchars($prod['idioma']); ?></span>
+                                    </div>
                                 </div>
                                 <div class="producao-footer">
                                     <div>
                                         <?php if ($prod['link']): ?>
-                                            <a href="<?php echo htmlspecialchars($prod['link']); ?>" target="_blank" class="btn btn-sm btn-outline-info"><i class="bi bi-box-arrow-up-right me-1"></i> Acessar</a>
+                                            <a href="<?php echo htmlspecialchars($prod['link']); ?>" target="_blank"
+                                                class="btn btn-sm btn-outline-info"><i class="bi bi-box-arrow-up-right me-1"></i>
+                                                Acessar</a>
                                         <?php endif; ?>
                                     </div>
                                     <div class="btn-group">
                                         <?php if ($_SESSION['usuario_nivel'] == 'admin' || (isset($_SESSION['professor_id']) && $prod['id_professor'] == $_SESSION['professor_id'])): ?>
-                                            <form method="POST" action="../../controllers/ProducaoController.php?action=delete" class="d-inline" onsubmit="return confirm('Tem certeza?')">
+                                            <a href="edit.php?id=<?php echo $prod['id']; ?>" class="btn btn-sm btn-outline-primary"
+                                                title="Editar">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+
+                                            <form method="POST" action="../../../controllers/ProducaoController.php?action=delete"
+                                                class="d-inline" onsubmit="return confirm('Tem certeza?')">
                                                 <input type="hidden" name="id" value="<?php echo $prod['id']; ?>">
-                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Excluir"><i class="bi bi-trash"></i></button>
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Excluir"><i
+                                                        class="bi bi-trash"></i></button>
                                             </form>
                                         <?php endif; ?>
                                     </div>
@@ -257,22 +532,29 @@ unset($_SESSION['sucesso'], $_SESSION['erro']);
                             </tr>
                         </thead>
                         <tbody>
-                            <?php foreach ($producoes as $prod): 
-                                $badge_class = match($prod['tipo']) { 'Artigo'=>'badge-artigo', 'Livro'=>'badge-livro', 'Tese'=>'badge-tese', default=>'badge-outro' };
+                            <?php foreach ($producoes as $prod):
+                                $badge_class = match ($prod['tipo']) { 'Artigo' => 'badge-artigo', 'Livro' => 'badge-livro', 'Tese' => 'badge-tese', default => 'badge-outro'};
                                 $tipo_display = ($prod['tipo'] == 'Outro' && !empty($prod['tipo_outro'])) ? $prod['tipo_outro'] : $prod['tipo'];
-                            ?>
+                                ?>
                                 <tr class="producao-item" data-tipo="<?php echo $prod['tipo']; ?>">
                                     <td><strong><?php echo htmlspecialchars($prod['titulo']); ?></strong></td>
                                     <td><small class="text-muted"><?php echo htmlspecialchars($prod['autor']); ?></small></td>
-                                    <td><span class="badge badge-tipo <?php echo $badge_class; ?>"><?php echo htmlspecialchars($tipo_display); ?></span></td>
-                                    <td><?php echo $prod['data_pub'] ? date('d/m/Y', strtotime($prod['data_pub'])) : '-'; ?></td>
+                                    <td><span
+                                            class="badge badge-tipo <?php echo $badge_class; ?>"><?php echo htmlspecialchars($tipo_display); ?></span>
+                                    </td>
+                                    <td><?php echo $prod['data_pub'] ? date('d/m/Y', strtotime($prod['data_pub'])) : '-'; ?>
+                                    </td>
                                     <td><?php echo htmlspecialchars($prod['idioma']); ?></td>
                                     <td>
                                         <div class="btn-group">
                                             <?php if ($_SESSION['usuario_nivel'] == 'admin' || (isset($_SESSION['professor_id']) && $prod['id_professor'] == $_SESSION['professor_id'])): ?>
-                                                <form method="POST" action="../../controllers/ProducaoController.php?action=delete" class="d-inline" onsubmit="return confirm('Tem certeza?')">
+                                                <a href="edit.php?id=<?php echo $prod['id']; ?>" class="btn btn-sm btn-outline-primary" title="Editar">
+                                                <i class="bi bi-pencil"></i></a>
+                                                <form method="POST" action="../../controllers/ProducaoController.php?action=delete"
+                                                    class="d-inline" onsubmit="return confirm('Tem certeza?')">
                                                     <input type="hidden" name="id" value="<?php echo $prod['id']; ?>">
-                                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Excluir"><i class="bi bi-trash"></i></button>
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Excluir"><i
+                                                            class="bi bi-trash"></i></button>
                                                 </form>
                                             <?php endif; ?>
                                         </div>
@@ -291,7 +573,7 @@ unset($_SESSION['sucesso'], $_SESSION['erro']);
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta3/dist/js/bootstrap-select.min.js"></script>
-    
+
     <script>
         const gridViewBtn = document.getElementById('gridViewBtn');
         const tableViewBtn = document.getElementById('tableViewBtn');
@@ -313,7 +595,7 @@ unset($_SESSION['sucesso'], $_SESSION['erro']);
 
         const searchInput = document.getElementById('searchInput');
         const filterTipo = document.getElementById('filterTipo');
-        
+
         function filterProducoes() {
             const searchTerm = searchInput.value.toLowerCase().trim();
             const tipoValue = filterTipo.value;
@@ -336,4 +618,5 @@ unset($_SESSION['sucesso'], $_SESSION['erro']);
         });
     </script>
 </body>
+
 </html>

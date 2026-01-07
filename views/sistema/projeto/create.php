@@ -1,11 +1,13 @@
 <?php
-// views/projeto/create.php
+// ==========================================================
+// views/sistema/projeto/create.php
+// ==========================================================
 
 session_start();
 
 // 1. Verificações de Acesso
 if (!isset($_SESSION['usuario_id'])) {
-    header("Location: ../auth/login.php");
+    header("Location: ../../auth/login.php");
     exit();
 }
 
@@ -16,6 +18,7 @@ if ($_SESSION['usuario_nivel'] == 'professor' && !isset($_SESSION['professor_id'
     exit();
 }
 
+// 2. Configuração e Models (Caminhos ajustados para 3 níveis)
 require_once '../../../config/database.php';
 require_once '../../../models/Professor.php';
 
@@ -94,7 +97,6 @@ unset($_SESSION['erro']);
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
         }
         
-        /* Ajuste do Bootstrap Select */
         .bootstrap-select .dropdown-toggle {
             border: 1px solid #ced4da;
             background-color: white;
@@ -112,7 +114,7 @@ unset($_SESSION['erro']);
                     <p class="mb-0 text-white-50">Cadastro de projetos de pesquisa e extensão</p>
                 </div>
                 <div>
-                    <a href="index.php" class="btn btn-outline-light btn-sm">
+                    <a href="../projeto.php" class="btn btn-outline-light btn-sm">
                         <i class="bi bi-arrow-left me-1"></i> Voltar
                     </a>
                 </div>
@@ -130,7 +132,7 @@ unset($_SESSION['erro']);
 
         <div class="row justify-content-center">
             <div class="col-lg-10">
-                <form action="../../controllers/ProjetoController.php?action=create" method="POST" enctype="multipart/form-data">
+                <form action="../../../controllers/ProjetoController.php?action=create" method="POST" enctype="multipart/form-data">
                     
                     <div class="form-card">
                         <h5 class="mb-4 pb-2 border-bottom text-primary">
@@ -195,7 +197,28 @@ unset($_SESSION['erro']);
 
                     <div class="form-card">
                         <h5 class="mb-4 pb-2 border-bottom text-primary">
-                            <i class="bi bi-calendar-event me-2"></i> Detalhes e Imagens
+                            <i class="bi bi-journal-text me-2"></i> Detalhes Acadêmicos
+                        </h5>
+
+                        <div class="mb-3">
+                            <label class="form-label">Objetivos</label>
+                            <textarea class="form-control" name="objetivos" rows="3" placeholder="Quais são os objetivos principais?"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Resultados Esperados / Alcançados</label>
+                            <textarea class="form-control" name="resultados" rows="3" placeholder="Resultados obtidos ou esperados..."></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Alunos Envolvidos</label>
+                            <input type="text" class="form-control" name="alunos_envolvidos" placeholder="Nomes dos alunos bolsistas ou voluntários">
+                        </div>
+                    </div>
+
+                    <div class="form-card">
+                        <h5 class="mb-4 pb-2 border-bottom text-primary">
+                            <i class="bi bi-calendar-check me-2"></i> Gestão e Mídia
                         </h5>
 
                         <div class="row">
@@ -209,20 +232,41 @@ unset($_SESSION['erro']);
                             </div>
                         </div>
 
-                        <div class="mb-4">
-                            <label class="form-label">Imagem de Capa</label>
-                            <input type="file" class="form-control" name="imagem" accept="image/*">
-                            <div class="form-text">Recomendado: Imagem horizontal (JPG, PNG ou WEBP).</div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Agência Financiadora</label>
+                                <input type="text" class="form-control" name="agencia_financiadora" placeholder="Ex: IFMG, FAPEMIG, CNPq...">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Valor do Financiamento (R$)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">R$</span>
+                                    <input type="number" step="0.01" class="form-control" name="financiamento" placeholder="0,00">
+                                </div>
+                            </div>
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Parceria / Fomento</label>
-                            <input type="text" class="form-control" name="parceria" placeholder="Ex: CNPq, FAPEMIG, Empresa X...">
+                            <label class="form-label">Parcerias Externas</label>
+                            <input type="text" class="form-control" name="parceria" placeholder="Empresas ou instituições parceiras">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Links Relacionados</label>
+                            <input type="text" class="form-control" name="links" placeholder="Link para site, repositório ou publicação">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Galeria de Imagens</label>
+                            <input type="file" class="form-control" name="imagens[]" multiple accept="image/*">
+                            <div class="form-text">
+                                <i class="bi bi-info-circle"></i> Segure <strong>CTRL</strong> para selecionar múltiplas imagens. A primeira imagem selecionada será usada como capa.
+                            </div>
                         </div>
                     </div>
 
                     <div class="d-flex justify-content-end gap-2 mb-5">
-                        <a href="index.php" class="btn btn-secondary">Cancelar</a>
+                        <a href="../projeto.php" class="btn btn-secondary">Cancelar</a>
                         <button type="submit" class="btn btn-save">
                             <i class="bi bi-check-circle me-1"></i> Salvar Projeto
                         </button>

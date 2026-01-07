@@ -1,5 +1,5 @@
 <?php
-// views/projeto/index.php - Listagem de Projetos
+// views/projeto/index.php
 
 session_start();
 

@@ -1,13 +1,11 @@
 <?php
 // controllers/UsuarioController.php
 
-// 1. Correção: Iniciar sessão apenas se não existir
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-
-// 2. Correção: Uso de __DIR__ para caminhos absolutos (evita erros de inclusão)
-require_once __DIR__ . '/../../config/database.php';
+require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../models/Usuario.php';
 
 class UsuarioController
@@ -45,16 +43,16 @@ class UsuarioController
             // Verificar duplicidade de email
             if ($this->usuario->emailExiste()) {
                 $_SESSION['erro'] = "Este email já está cadastrado!";
-                header("Location: ../views/usuario/create.php");
+                header("Location: ../views/sistema/usuario/create.php");
                 exit();
             }
 
             if ($this->usuario->criar()) {
                 $_SESSION['sucesso'] = "Professor cadastrado com sucesso!";
-                header("Location: ../views/usuario/index.php");
+                header("Location: ../views/sistema/usuario/index.php");
             } else {
                 $_SESSION['erro'] = "Erro ao cadastrar usuário.";
-                header("Location: ../views/usuario/create.php");
+                header("Location: ../views/sistema/usuario/create.php");
             }
             exit();
         }
@@ -71,7 +69,7 @@ class UsuarioController
 
         // 2. Receber ID
         if (!isset($_POST['id'])) {
-            header("Location: ../views/usuario/index.php");
+            header("Location: ../views/sistema/usuario/index.php");
             exit();
         }
 
@@ -80,7 +78,7 @@ class UsuarioController
         // 3. Evitar auto-exclusão (Admin não pode se deletar)
         if ($id_para_deletar == $_SESSION['usuario_id']) {
             $_SESSION['erro'] = "Você não pode excluir sua própria conta!";
-            header("Location: ../views/usuario/index.php");
+            header("Location: ../views/sistema/usuario/index.php");
             exit();
         }
 
@@ -112,7 +110,7 @@ class UsuarioController
             $_SESSION['erro'] = "Erro: " . $e->getMessage();
         }
 
-        header("Location: ../views/usuario/index.php");
+        header("Location: ../views/sistema/usuario/index.php");
         exit();
     }
 }

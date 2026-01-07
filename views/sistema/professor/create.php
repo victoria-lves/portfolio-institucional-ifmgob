@@ -118,16 +118,12 @@ $completar = isset($_GET['completar']);
                     </div>
                     <div>
                         <h6 class="alert-heading fw-bold mb-1">Perfil Incompleto</h6>
-                        <p class="mb-0 small">Para cadastrar projetos ou produções, você precisará preencher este
-                            formulário. Você pode <a href="../painel.php" class="alert-link">fazer isso mais
-                                tarde</a>,
-                            mas algumas funções estarão bloqueadas.</p>
                     </div>
                 </div>
             </div>
         <?php endif; ?>
 
-        <form action="../../controllers/ProfessorController.php?action=create" method="POST"
+        <form action="../../../controllers/ProfessorController.php?action=create" method="POST"
             enctype="multipart/form-data">
 
             <div class="row">
@@ -164,7 +160,7 @@ $completar = isset($_GET['completar']);
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Área de Atuação *</label>
                                 <input type="text" class="form-control" name="area_atuacao" required
-                                    placeholder="Ex: Inteligência Artificial">
+                                    placeholder="Ex: Biologia">
                             </div>
                         </div>
 
@@ -208,12 +204,6 @@ $completar = isset($_GET['completar']);
                             <button type="submit" class="btn btn-save py-2">
                                 <i class="bi bi-check-circle-fill me-2"></i> Salvar Perfil
                             </button>
-
-                            <?php if ($completar): ?>
-                                <a href="../painel.php" class="btn btn-outline-secondary btn-sm mt-2">
-                                    Fazer isso mais tarde
-                                </a>
-                            <?php endif; ?>
                         </div>
                     </div>
                 </div>

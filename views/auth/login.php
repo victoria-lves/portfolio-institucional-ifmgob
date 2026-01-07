@@ -1,8 +1,5 @@
 <?php
-// ==============================================
-// views/auth/login.php - Tela de Login
-// ==============================================
-
+// views/auth/login.php
 session_start();
 
 // 1. Redirecionamento se já estiver logado

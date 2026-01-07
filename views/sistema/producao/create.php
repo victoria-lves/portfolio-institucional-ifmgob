@@ -91,7 +91,7 @@ unset($_SESSION['erro'], $_SESSION['sucesso']);
 
         <div class="row">
             <div class="col-lg-8 mx-auto">
-                <form action="../../controllers/ProducaoController.php?action=create" method="POST" id="formProducao">
+                <form action="../../../controllers/ProducaoController.php?action=create" method="POST" id="formProducao">
                     
                     <div class="form-card">
                         <h5 class="mb-4 border-bottom pb-2 text-primary"><i class="bi bi-info-circle me-2"></i> Informações da Obra</h5>

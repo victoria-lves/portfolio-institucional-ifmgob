@@ -31,9 +31,11 @@ class Projeto {
     // ==========================================================
     public function criar() {
         $query = "INSERT INTO " . $this->table_name . "
-                (titulo, autor, descricao, data_inicio, status, data_fim, links, parceria, objetivos, resultados, area_conhecimento, alunos_envolvidos, agencia_financiadora, financiamento)
+                (titulo, autor, descricao, data_inicio, status, data_fim, links, parceria, 
+                 objetivos, resultados, area_conhecimento, alunos_envolvidos, agencia_financiadora, financiamento)
                 VALUES
-                (:titulo, :autor, :descricao, :data_inicio, :status, :data_fim, :links, :parceria, :objetivos, :resultados, :area_conhecimento, :alunos_envolvidos, :agencia_financiadora, :financiamento)";
+                (:titulo, :autor, :descricao, :data_inicio, :status, :data_fim, :links, :parceria, 
+                 :objetivos, :resultados, :area_conhecimento, :alunos_envolvidos, :agencia_financiadora, :financiamento)";
         
         $stmt = $this->conn->prepare($query);
 
@@ -63,7 +65,7 @@ class Projeto {
         $stmt->bindParam(":financiamento", $this->financiamento);
 
         if ($stmt->execute()) {
-            // Captura o ID gerado para uso no Controller (vincular professores/imagens)
+            // Captura o ID gerado para uso no Controller
             $this->id = $this->conn->lastInsertId();
             return true;
         }
@@ -98,6 +100,7 @@ class Projeto {
         $this->data_fim = !empty($this->data_fim) ? $this->data_fim : null;
         $this->financiamento = !empty($this->financiamento) ? $this->financiamento : null;
 
+        // Bind
         $stmt->bindParam(":titulo", $this->titulo);
         $stmt->bindParam(":autor", $this->autor);
         $stmt->bindParam(":descricao", $this->descricao);
@@ -118,7 +121,7 @@ class Projeto {
     }
 
     // ==========================================================
-    // DELETAR (DELETE)
+    // EXCLUIR (DELETE)
     // ==========================================================
     public function delete($id) {
         $query = "DELETE FROM " . $this->table_name . " WHERE id = :id";
@@ -128,37 +131,44 @@ class Projeto {
     }
 
     // ==========================================================
-    // MÉTODOS DE LEITURA
+    // LISTAR TODOS (Admin ou Visão Geral)
     // ==========================================================
-    
-    // Lista todos os projetos (com os IDs dos autores concatenados para verificação rápida)
     public function listar() {
+        // Traz os dados do projeto E os IDs dos professores vinculados (ids_autores)
         $query = "SELECT p.*, GROUP_CONCAT(pp.id_professor) as ids_autores
                   FROM " . $this->table_name . " p
                   LEFT JOIN professor_projeto pp ON p.id = pp.id_projeto
                   GROUP BY p.id
                   ORDER BY p.data_inicio DESC";
+        
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
         return $stmt;
     }
 
-    // Lista projetos de um professor específico (usando a tabela de ligação)
+    // ==========================================================
+    // LISTAR POR PROFESSOR
+    // ==========================================================
     public function listarPorProfessor($id_professor) {
+        // Seleciona projetos onde o professor é um dos autores
+        // Também traz o GROUP_CONCAT para saber quem são os co-autores
         $query = "SELECT p.*, GROUP_CONCAT(pp_todos.id_professor) as ids_autores
                   FROM " . $this->table_name . " p
-                  INNER JOIN professor_projeto pp ON p.id = pp.id_projeto
+                  INNER JOIN professor_projeto pp_filtro ON p.id = pp_filtro.id_projeto
                   LEFT JOIN professor_projeto pp_todos ON p.id = pp_todos.id_projeto
-                  WHERE pp.id_professor = :id
+                  WHERE pp_filtro.id_professor = :id
                   GROUP BY p.id
                   ORDER BY p.data_inicio DESC";
+
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':id', $id_professor);
         $stmt->execute();
         return $stmt;
     }
 
-    // Busca um único projeto pelo ID
+    // ==========================================================
+    // BUSCAR POR ID (Detalhes)
+    // ==========================================================
     public function buscarPorId($id) {
         $query = "SELECT * FROM " . $this->table_name . " WHERE id = ? LIMIT 1";
         $stmt = $this->conn->prepare($query);
@@ -167,6 +177,7 @@ class Projeto {
         
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
+        // Preenche as propriedades do objeto se encontrou
         if($row) {
             $this->id = $row['id'];
             $this->titulo = $row['titulo'];
@@ -184,6 +195,7 @@ class Projeto {
             $this->agencia_financiadora = $row['agencia_financiadora'];
             $this->financiamento = $row['financiamento'];
         }
+        
         return $row;
     }
 }

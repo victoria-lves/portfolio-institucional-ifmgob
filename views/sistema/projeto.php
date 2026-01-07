@@ -168,11 +168,11 @@ unset($_SESSION['sucesso'], $_SESSION['erro']);
                             </td>
                             <td><?php echo $dataInicio; ?></td>
                             <td class="text-end actions-col">
-                                <a href="../projeto/view.php?id=<?php echo $p['id']; ?>" class="btn btn-sm btn-outline-info" title="Visualizar">
+                                <a href="projeto/view.php?id=<?php echo $p['id']; ?>" class="btn btn-sm btn-outline-info" title="Visualizar">
                                     <i class="bi bi-eye"></i>
                                 </a>
 
-                                <a href="../projeto/edit.php?id=<?php echo $p['id']; ?>" class="btn btn-sm btn-outline-primary" title="Editar">
+                                <a href="projeto/edit.php?id=<?php echo $p['id']; ?>" class="btn btn-sm btn-outline-primary" title="Editar">
                                     <i class="bi bi-pencil"></i>
                                 </a>
 

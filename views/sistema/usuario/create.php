@@ -6,7 +6,7 @@ session_start();
 // 1. Verificação de Segurança (Apenas Admin)
 if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_nivel'] != 'admin') {
     $_SESSION['erro'] = "Acesso restrito a administradores.";
-    header("Location: ../sistema/painel.php");
+    header("Location: ../painel.php");
     exit();
 }
 
@@ -104,7 +104,7 @@ unset($_SESSION['erro'], $_SESSION['sucesso']);
                     <a href="index.php" class="btn btn-outline-light btn-sm">
                         <i class="bi bi-arrow-left me-1"></i> Voltar
                     </a>
-                    <a href="../sistema/painel.php" class="btn btn-light btn-sm text-primary fw-bold">
+                    <a href="../painel.php" class="btn btn-light btn-sm text-primary fw-bold">
                         <i class="bi bi-speedometer2 me-1"></i> Painel
                     </a>
                 </div>
@@ -129,7 +129,7 @@ unset($_SESSION['erro'], $_SESSION['sucesso']);
         <?php endif; ?>
 
         <div class="form-card">
-            <form action="../../controllers/UsuarioController.php?action=create" method="POST">
+            <form action="../../../controllers/UsuarioController.php?action=create" method="POST">
                 
                 <h5 class="mb-4 text-primary fw-bold border-bottom pb-3">Dados de Acesso</h5>
 

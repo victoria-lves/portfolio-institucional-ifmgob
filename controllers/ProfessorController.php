@@ -5,7 +5,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // Configurações e Imports
-require_once __DIR__ . '/../../config/database.php';
+require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../models/Professor.php';
 require_once __DIR__ . '/../utils/ImageHandler.php';
 
@@ -97,7 +97,7 @@ class ProfessorController
                         header("Location: ../views/sistema/painel.php");
                     } else {
                         $_SESSION['sucesso'] = "Professor cadastrado com sucesso!";
-                        header("Location: ../views/professor/edit.php"); // Ou lista de professores
+                        header("Location: ../views/sistema/professor/edit.php"); // Ou lista de professores
                     }
                 } else {
                     throw new Exception("Erro ao inserir registro no banco de dados.");
@@ -105,7 +105,7 @@ class ProfessorController
 
             } catch (Exception $e) {
                 $_SESSION['erro'] = "Erro: " . $e->getMessage();
-                header("Location: ../views/professor/create.php");
+                header("Location: ../views/sistema/professor/create.php");
             }
             exit();
         }
@@ -191,9 +191,9 @@ class ProfessorController
                     // Redireciona
                     if ($_SESSION['usuario_nivel'] == 'admin') {
                         // Se admin editou, volta para lista ou para o mesmo edit
-                         header("Location: ../views/professor/edit.php?id=" . $id);
+                         header("Location: ../views/sistema/professor/edit.php?id=" . $id);
                     } else {
-                        header("Location: ../views/professor/edit.php?id=" . $id);
+                        header("Location: ../views/sistema/professor/edit.php?id=" . $id);
                     }
                 } else {
                     throw new Exception("Erro ao atualizar o banco de dados.");
@@ -203,7 +203,7 @@ class ProfessorController
                 $_SESSION['erro'] = $e->getMessage();
                 // Tenta voltar para a página de edição correta
                 $idRedirect = isset($_POST['id']) ? "?id=" . $_POST['id'] : "";
-                header("Location: ../views/professor/edit.php" . $idRedirect);
+                header("Location: ../views/sistema/professor/edit.php" . $idRedirect);
             }
             exit();
         }

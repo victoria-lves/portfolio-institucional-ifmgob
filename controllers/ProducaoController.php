@@ -5,7 +5,8 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-require_once __DIR__ . '/../../config/database.php';
+// Caminhos absolutos
+require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../models/Producao.php';
 
 class ProducaoController
@@ -21,7 +22,7 @@ class ProducaoController
     }
 
     // ==========================================================
-    // ACTION: CREATE
+    // ACTION: CREATE (CRIAR)
     // ==========================================================
     public function create()
     {
@@ -46,52 +47,84 @@ class ProducaoController
                 $this->producao->idioma_outro = ($_POST['idioma'] === 'Outro') ? trim($_POST['idioma_outro'] ?? '') : null;
                 $this->producao->link = trim($_POST['link'] ?? '');
 
-                // Vínculo com Professor (Automático ou Selecionado pelo Admin)
+                // Vínculo com Professor (Automático se for professor logado)
                 if ($_SESSION['usuario_nivel'] == 'professor') {
                     $this->producao->id_professor = $_SESSION['professor_id'];
                 } else {
+                    // Se for admin criando, pode ter vindo de um select (opcional)
                     $this->producao->id_professor = !empty($_POST['id_professor']) ? $_POST['id_professor'] : null;
                 }
 
                 // 3. Salvar
                 if ($this->producao->criar()) {
                     $_SESSION['sucesso'] = "Produção acadêmica cadastrada com sucesso!";
-                    header("Location: ../views/producao/index.php");
+                    header("Location: ../views/sistema/producao/index.php");
                 } else {
                     throw new Exception("Erro ao salvar no banco de dados.");
                 }
 
             } catch (Exception $e) {
                 $_SESSION['erro'] = $e->getMessage();
-                // Redireciona de volta com erro
-                header("Location: ../views/producao/create.php");
+                header("Location: ../views/sistema/producao/create.php");
             }
             exit();
         }
     }
 
     // ==========================================================
-    // ACTION: UPDATE (Se houver edição no futuro)
+    // ACTION: UPDATE (ATUALIZAR)
     // ==========================================================
-    public function update()
-    {
+    public function update() {
         $this->checkAuth();
 
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             try {
-                $this->producao->id = $_POST['id'];
-                // ... lógica similar ao create, chamando $this->producao->atualizar()
-                // Implemente se tiver a view edit.php
+                $id = $_POST['id'];
+                
+                // 1. Buscar dados originais para manter o id_professor
+                // Isso evita que a produção "perca o dono" e suma da lista do professor
+                $dadosOriginais = $this->producao->buscarPorId($id);
+                
+                if (!$dadosOriginais) {
+                    throw new Exception("Produção não encontrada.");
+                }
+
+                // 2. Validar Permissão (Admin ou Dono)
+                if ($_SESSION['usuario_nivel'] != 'admin' && $dadosOriginais['id_professor'] != $_SESSION['professor_id']) {
+                    throw new Exception("Você não tem permissão para editar este registro.");
+                }
+                
+                // 3. Setar Novos Dados
+                $this->producao->id = $id;
+                $this->producao->titulo = trim($_POST['titulo']);
+                $this->producao->autor = trim($_POST['autor']);
+                $this->producao->tipo = $_POST['tipo'];
+                $this->producao->tipo_outro = ($_POST['tipo'] == 'Outro') ? trim($_POST['tipo_outro']) : null;
+                $this->producao->data_pub = !empty($_POST['data_pub']) ? $_POST['data_pub'] : null;
+                $this->producao->idioma = $_POST['idioma'];
+                $this->producao->link = trim($_POST['link']);
+                
+                // 4. IMPORTANTE: Manter o dono original
+                $this->producao->id_professor = $dadosOriginais['id_professor'];
+
+                // 5. Atualizar
+                if ($this->producao->atualizar()) {
+                    $_SESSION['sucesso'] = "Produção atualizada com sucesso!";
+                } else {
+                    throw new Exception("Erro ao atualizar produção no banco de dados.");
+                }
+                
             } catch (Exception $e) {
                 $_SESSION['erro'] = $e->getMessage();
-                header("Location: ../views/producao/index.php");
             }
+            
+            header("Location: ../views/sistema/producao/index.php");
             exit();
         }
     }
 
     // ==========================================================
-    // ACTION: DELETE
+    // ACTION: DELETE (EXCLUIR)
     // ==========================================================
     public function delete()
     {
@@ -101,27 +134,29 @@ class ProducaoController
             try {
                 $id = $_POST['id'];
                 
-                // Validar permissão (Apenas Admin ou o Próprio Dono)
+                // 1. Validar permissão (Apenas Admin ou o Próprio Dono)
                 if ($_SESSION['usuario_nivel'] != 'admin') {
                     $dados = $this->producao->buscarPorId($id);
-                    if ($dados['id_professor'] != $_SESSION['professor_id']) {
-                        throw new Exception("Permissão negada.");
+                    if (!$dados || $dados['id_professor'] != $_SESSION['professor_id']) {
+                        throw new Exception("Permissão negada ou registro não encontrado.");
                     }
                 }
 
+                // 2. Excluir
                 if ($this->producao->delete($id)) {
                     $_SESSION['sucesso'] = "Registro excluído com sucesso!";
                 } else {
-                    throw new Exception("Erro ao excluir.");
+                    throw new Exception("Erro ao excluir do banco de dados.");
                 }
             } catch (Exception $e) {
                 $_SESSION['erro'] = $e->getMessage();
             }
-            header("Location: ../views/producao/index.php");
+            header("Location: ../views/sistema/producao/index.php");
             exit();
         }
     }
 
+    // Método Auxiliar de Autenticação
     private function checkAuth() {
         if (!isset($_SESSION['usuario_id'])) {
             header("Location: ../views/auth/login.php");
@@ -130,7 +165,7 @@ class ProducaoController
     }
 }
 
-// Roteamento
+// Roteador Simples
 if (isset($_GET['action'])) {
     $controller = new ProducaoController();
     switch ($_GET['action']) {

@@ -1,22 +1,24 @@
 <?php
 class ImageHandler {
     /**
-     * Redimensiona e salva uma imagem
-     * @param array $file O arquivo $_FILES['imagem']
-     * @param string $targetDir O diretório de destino (ex: ../img/projetos/)
-     * @param string $targetName O nome final do arquivo (ex: projeto_123.webp)
-     * @param int $maxWidth Largura máxima permitida (ex: 1024px)
-     * @return bool True se sucesso, False se falha
+     * Redimensiona e salva uma imagem com fallback de segurança
      */
     public static function resizeAndSave($file, $targetDir, $targetName, $maxWidth = 1024) {
         $sourcePath = $file['tmp_name'];
         $destPath = $targetDir . $targetName;
+
+        // VERIFICAÇÃO DE SEGURANÇA: Se a biblioteca GD não estiver ativa
+        if (!extension_loaded('gd') || !function_exists('imagecreatetruecolor')) {
+            // Apenas move o arquivo original sem redimensionar (evita o erro fatal)
+            return move_uploaded_file($sourcePath, $destPath);
+        }
         
         // 1. Obter informações da imagem original
-        list($width, $height, $type) = getimagesize($sourcePath);
-        
-        // Se não for imagem válida, retorna erro
-        if (!$width) return false;
+        // O @ suprime erros se o arquivo não for uma imagem válida
+        $imageInfo = @getimagesize($sourcePath);
+        if (!$imageInfo) return false;
+
+        list($width, $height, $type) = $imageInfo;
 
         // 2. Calcular novas dimensões (Mantendo Proporção)
         $ratio = $width / $height;
@@ -50,7 +52,12 @@ class ImageHandler {
                 imagesavealpha($newImage, true);
                 break;
             default:
-                return false; // Tipo não suportado
+                // Tipo não suportado pelo GD, tenta mover o arquivo original
+                return move_uploaded_file($sourcePath, $destPath);
+        }
+
+        if (!$source) {
+            return move_uploaded_file($sourcePath, $destPath);
         }
 
         // 5. Copiar e redimensionar a imagem original para a nova
@@ -61,19 +68,19 @@ class ImageHandler {
             $width, $height
         );
 
-        // 6. Salvar no disco (Aqui convertemos tudo para WEBP ou JPG para padronizar e comprimir)
-        // Vamos salvar mantendo a extensão original ou forçar WEBP/JPG se preferires.
-        // Para este exemplo, salvamos baseado na extensão do nome de destino.
-        
+        // 6. Salvar no disco
         $ext = strtolower(pathinfo($targetName, PATHINFO_EXTENSION));
         $success = false;
 
         if ($ext == 'jpg' || $ext == 'jpeg') {
-            $success = imagejpeg($newImage, $destPath, 85); // Qualidade 85% (Compressão)
+            $success = imagejpeg($newImage, $destPath, 85);
         } elseif ($ext == 'png') {
-            $success = imagepng($newImage, $destPath, 8); // Compressão 0-9
+            $success = imagepng($newImage, $destPath, 8);
         } elseif ($ext == 'webp') {
-            $success = imagewebp($newImage, $destPath, 80); // Qualidade 80%
+            $success = imagewebp($newImage, $destPath, 80);
+        } else {
+            // Extensão desconhecida para as funções de salvamento, tenta JPG
+            $success = imagejpeg($newImage, $destPath, 85);
         }
 
         // 7. Limpar memória

@@ -164,7 +164,7 @@ try {
                 </div>
 
                 <div class='projeto-footer'>
-                    <a href='pagina-projeto.php?id=$id' class='projeto-titulo'>$titulo</a>
+                    <a href='pagina-projeto.php?id=$id' class='projeto-titulo'>
                      Ver Projeto <i class='fa-solid fa-arrow-right'></i>
                    </a>
                 </div>
