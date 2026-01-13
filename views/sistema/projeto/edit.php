@@ -1,6 +1,4 @@
 <?php
-// views/sistema/projeto/edit.php - Editar Projeto
-
 session_start();
 
 // 1. Verificações de Acesso
@@ -10,7 +8,7 @@ if (!isset($_SESSION['usuario_id']) || !isset($_GET['id'])) {
     exit();
 }
 
-// 2. Configuração e Models (Caminho ajustado para 3 níveis)
+// 2. Configuração e Models
 require_once '../../../config/database.php';
 require_once '../../../models/Professor.php';
 
