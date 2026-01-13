@@ -1,6 +1,4 @@
 <?php
-// views/usuario/create.php
-
 session_start();
 
 // 1. Verificação de Segurança (Apenas Admin)
