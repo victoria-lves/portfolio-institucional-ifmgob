@@ -78,15 +78,12 @@ Seguindo as diretrizes da **OWASP Top 10** e **LGPD**:
 1. **SQL Injection:** 100% das consultas utilizam **Prepared Statements** (PDO).
 2. **XSS (Cross-Site Scripting):** Toda saída de dados (output) passa por funções de sanitização (`htmlspecialchars`) para impedir injeção de scripts.
 3. **Autenticação:** Senhas armazenadas com hash **Bcrypt** (ou Argon2). Gerenciamento de sessão com regeneração de ID no login para evitar *Session Hijacking*.
-4. **Upload Seguro:** Verificação rigorosa de MIME Types (não apenas extensão) para impedir upload de scripts maliciosos (ex: `.php` disfarçado de `.jpg`).
-5. **LGPD:** Funcionalidades preparadas para "Direito ao Esquecimento" e logs de acesso transparentes.
-
 ---
 
 ## 🎨 Design e UX/UI
 
 * **Abordagem Desktop-First:** O desenvolvimento priorizou a experiência em telas maiores (Desktop), considerando que a visualização detalhada de portfólios e a gestão administrativa ocorrem predominantemente em computadores no ambiente institucional.
-* **Responsividade (Graceful Degradation):** A adaptação para dispositivos móveis foi realizada através de Media Queries (focadas em `max-width`), garantindo que o layout se ajuste e permaneça funcional em telas menores, sem perder a riqueza visual da versão principal.
+* **Responsividade:** A adaptação para dispositivos móveis foi realizada através de Media Queries (focadas em `max-width`), garantindo que o layout se ajuste e permaneça funcional em telas menores, sem perder a riqueza visual da versão principal.
 * **Arquitetura da Informação:** Navegação planejada para regra dos "3 cliques" (usuário chega ao conteúdo desejado em no máximo 3 interações).
 * **Acessibilidade (WCAG):** Uso de tags semânticas, alto contraste nas cores e atributos `aria-label` e `alt` em imagens para leitores de tela.
 
