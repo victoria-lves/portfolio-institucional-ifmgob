@@ -1,6 +1,4 @@
 <?php
-// controllers/UsuarioController.php
-
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -34,11 +32,10 @@ class UsuarioController
             $this->usuario->email = trim($_POST['email']);
             
             // 3. Segurança: Criptografar a senha antes de salvar
-            // O código original salvava em texto puro, o que é inseguro.
             $senha_plana = $_POST['senha'];
             $this->usuario->senha = password_hash($senha_plana, PASSWORD_DEFAULT);
             
-            $this->usuario->nivel = 'professor'; // Padrão ao criar por aqui
+            $this->usuario->nivel = 'professor';
 
             // Verificar duplicidade de email
             if ($this->usuario->emailExiste()) {
@@ -85,7 +82,6 @@ class UsuarioController
         try {
             // 4. Limpeza de Arquivos (Melhoria)
             // Antes de deletar o usuário, verificamos se ele é um professor e se tem foto para apagar.
-            // Isso evita "lixo" na pasta de imagens, já que o CASCADE do banco apaga o registro mas não o arquivo.
             $queryFoto = "SELECT pfp FROM professor WHERE id_usuario = :id LIMIT 1";
             $stmtFoto = $this->db->prepare($queryFoto);
             $stmtFoto->execute([':id' => $id_para_deletar]);
@@ -115,7 +111,7 @@ class UsuarioController
     }
 }
 
-// Roteamento de Ações
+// Roteamento
 if (isset($_GET['action'])) {
     $controller = new UsuarioController();
 
