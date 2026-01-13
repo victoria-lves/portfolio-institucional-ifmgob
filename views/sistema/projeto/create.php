@@ -15,7 +15,7 @@ if ($_SESSION['usuario_nivel'] == 'professor' && !isset($_SESSION['professor_id'
     exit();
 }
 
-// 2. Configuração e Models (Caminhos ajustados para 3 níveis)
+// 2. Configuração e Models
 require_once '../../../config/database.php';
 require_once '../../../models/Professor.php';
 
