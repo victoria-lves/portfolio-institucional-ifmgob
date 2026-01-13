@@ -1,5 +1,4 @@
 <?php
-// models/Usuario.php
 
 class Usuario {
     private $conn;
@@ -23,13 +22,10 @@ class Usuario {
 
         $stmt = $this->conn->prepare($query);
 
-        // Limpar dados (Sanitização)
+        // Limpar dados
         $this->nome = htmlspecialchars(strip_tags($this->nome));
         $this->email = htmlspecialchars(strip_tags($this->email));
         $this->nivel = htmlspecialchars(strip_tags($this->nivel));
-        
-        // [CORREÇÃO] NÃO fazer hash aqui, pois o Controller já enviou a senha criptografada.
-        // Se fizer aqui de novo, a senha no banco ficará inválida.
 
         $stmt->bindParam(":nome", $this->nome);
         $stmt->bindParam(":email", $this->email);
@@ -37,7 +33,6 @@ class Usuario {
         $stmt->bindParam(":nivel", $this->nivel);
 
         if ($stmt->execute()) {
-            // [MELHORIA] Captura o ID gerado (útil se precisar logar logo após criar)
             $this->id = $this->conn->lastInsertId();
             return true;
         }
@@ -56,7 +51,7 @@ class Usuario {
         return false;
     }
 
-    // Verificar se email existe (para evitar duplicidade)
+    // Verificar se email existe
     public function emailExiste() {
         $query = "SELECT id FROM " . $this->table_name . " WHERE email = :email LIMIT 1";
         $stmt = $this->conn->prepare($query);
