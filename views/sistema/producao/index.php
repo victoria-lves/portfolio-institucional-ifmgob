@@ -1,5 +1,4 @@
 <?php
-// views/producao/index.php
 session_start();
 
 // Verificar se está logado
