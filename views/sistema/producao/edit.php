@@ -1,5 +1,4 @@
 <?php
-// views/producao/edit.php
 session_start();
 
 // 1. Verificação de Acesso
