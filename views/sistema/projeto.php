@@ -1,6 +1,4 @@
 <?php
-// views/sistema/projeto.php - Gerenciamento de Projetos
-
 session_start();
 
 // 1. Verificação de Segurança
