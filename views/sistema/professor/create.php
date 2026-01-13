@@ -1,6 +1,4 @@
 <?php
-// views/professor/create.php
-
 session_start();
 
 // Verificar se está logado
