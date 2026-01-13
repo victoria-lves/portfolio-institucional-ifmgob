@@ -1,5 +1,5 @@
 <?php
-// views/sistema/projeto/view.php
+
 session_start();
 
 // 1. Verificações de Acesso
@@ -14,7 +14,7 @@ if (!isset($_GET['id'])) {
     exit();
 }
 
-// 2. Configuração e Conexão (3 níveis acima)
+// 2. Configuração e Conexão
 require_once '../../../config/database.php';
 $database = new Database();
 $db = $database->getConnection();
