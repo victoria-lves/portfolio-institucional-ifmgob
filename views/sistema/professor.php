@@ -1,5 +1,4 @@
 <?php
-// public/professor.php - Página pública SEM curtidas
 require_once '../../config/database.php';
 require_once '../models/Professor.php';
 require_once '../models/Producao.php';
@@ -34,7 +33,6 @@ if (method_exists($producao, 'listarPorProfessor')) {
     });
 }
 
-// Assumindo que a variável $professor['nome'] contém o nome do docente
 $nome_prof = htmlspecialchars($professor['nome'] ?? 'Docente');
 $area_prof = htmlspecialchars($professor['area_atuacao'] ?? 'Ensino');
 
