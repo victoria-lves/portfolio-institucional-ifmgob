@@ -1,15 +1,12 @@
 <?php
 class ImageHandler {
-    /**
-     * Redimensiona e salva uma imagem com fallback de segurança
-     */
     public static function resizeAndSave($file, $targetDir, $targetName, $maxWidth = 1024) {
         $sourcePath = $file['tmp_name'];
         $destPath = $targetDir . $targetName;
 
         // VERIFICAÇÃO DE SEGURANÇA: Se a biblioteca GD não estiver ativa
         if (!extension_loaded('gd') || !function_exists('imagecreatetruecolor')) {
-            // Apenas move o arquivo original sem redimensionar (evita o erro fatal)
+            // Apenas move o arquivo original sem redimensionar
             return move_uploaded_file($sourcePath, $destPath);
         }
         
