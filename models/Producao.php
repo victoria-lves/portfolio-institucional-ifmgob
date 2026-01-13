@@ -1,5 +1,4 @@
 <?php
-// models/Producao.php
 
 class Producao {
     private $conn;
@@ -21,7 +20,6 @@ class Producao {
         $this->conn = $db;
     }
 
-    // LISTAR TODAS
     public function listar() {
         $query = "SELECT p.*, prof.nome as nome_professor 
                   FROM " . $this->table_name . " p
@@ -68,7 +66,6 @@ class Producao {
         return $row;
     }
 
-    // CRIAR
     public function criar() {
         $query = "INSERT INTO " . $this->table_name . "
                 (titulo, autor, data_pub, tipo, tipo_outro, idioma, idioma_outro, link, id_professor)
@@ -94,14 +91,12 @@ class Producao {
         $stmt->bindParam(":id_professor", $this->id_professor);
 
         if ($stmt->execute()) {
-            // [MELHORIA] Define o ID do objeto com o ID gerado no banco
             $this->id = $this->conn->lastInsertId(); 
             return true;
         }
         return false;
     }
-
-    // ATUALIZAR
+    
     public function atualizar() {
         $query = "UPDATE " . $this->table_name . "
                 SET titulo = :titulo, autor = :autor, data_pub = :data_pub,
@@ -132,7 +127,6 @@ class Producao {
         return $stmt->execute();
     }
 
-    // EXCLUIR
     public function delete($id) {
         $query = "DELETE FROM " . $this->table_name . " WHERE id = :id";
         $stmt = $this->conn->prepare($query);
