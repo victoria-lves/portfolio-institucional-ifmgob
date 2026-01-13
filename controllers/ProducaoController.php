@@ -1,5 +1,4 @@
 <?php
-// controllers/ProducaoController.php
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -21,9 +20,6 @@ class ProducaoController
         $this->producao = new Producao($this->db);
     }
 
-    // ==========================================================
-    // ACTION: CREATE (CRIAR)
-    // ==========================================================
     public function create()
     {
         $this->checkAuth();
@@ -51,7 +47,7 @@ class ProducaoController
                 if ($_SESSION['usuario_nivel'] == 'professor') {
                     $this->producao->id_professor = $_SESSION['professor_id'];
                 } else {
-                    // Se for admin criando, pode ter vindo de um select (opcional)
+                    
                     $this->producao->id_professor = !empty($_POST['id_professor']) ? $_POST['id_professor'] : null;
                 }
 
@@ -71,9 +67,6 @@ class ProducaoController
         }
     }
 
-    // ==========================================================
-    // ACTION: UPDATE (ATUALIZAR)
-    // ==========================================================
     public function update() {
         $this->checkAuth();
 
@@ -82,14 +75,14 @@ class ProducaoController
                 $id = $_POST['id'];
                 
                 // 1. Buscar dados originais para manter o id_professor
-                // Isso evita que a produção "perca o dono" e suma da lista do professor
+                // Isso evita que a produção perca o dono e suma da lista do professor
                 $dadosOriginais = $this->producao->buscarPorId($id);
                 
                 if (!$dadosOriginais) {
                     throw new Exception("Produção não encontrada.");
                 }
 
-                // 2. Validar Permissão (Admin ou Dono)
+                // 2. Validar Permissão (Admin ou Dono (prof))
                 if ($_SESSION['usuario_nivel'] != 'admin' && $dadosOriginais['id_professor'] != $_SESSION['professor_id']) {
                     throw new Exception("Você não tem permissão para editar este registro.");
                 }
@@ -123,9 +116,6 @@ class ProducaoController
         }
     }
 
-    // ==========================================================
-    // ACTION: DELETE (EXCLUIR)
-    // ==========================================================
     public function delete()
     {
         $this->checkAuth();
