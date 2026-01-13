@@ -1,5 +1,4 @@
 <?php
-// views/professor/edit.php
 
 session_start();
 
