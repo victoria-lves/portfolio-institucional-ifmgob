@@ -1,5 +1,4 @@
 <?php
-// views/projeto/index.php
 
 session_start();
 
