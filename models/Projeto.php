@@ -1,14 +1,12 @@
 <?php
-// models/Projeto.php
 
 class Projeto {
     private $conn;
     private $table_name = "projeto";
 
-    // Propriedades (Colunas da tabela 'projeto')
     public $id;
     public $titulo;
-    public $autor; // Nome do autor principal (texto)
+    public $autor;
     public $descricao;
     public $data_inicio;
     public $status;
@@ -26,9 +24,7 @@ class Projeto {
         $this->conn = $db;
     }
 
-    // ==========================================================
-    // CRIAR (INSERT)
-    // ==========================================================
+
     public function criar() {
         $query = "INSERT INTO " . $this->table_name . "
                 (titulo, autor, descricao, data_inicio, status, data_fim, links, parceria, 
@@ -72,9 +68,6 @@ class Projeto {
         return false;
     }
 
-    // ==========================================================
-    // ATUALIZAR (UPDATE)
-    // ==========================================================
     public function atualizar() {
         $query = "UPDATE " . $this->table_name . "
                 SET titulo = :titulo, 
@@ -120,9 +113,6 @@ class Projeto {
         return $stmt->execute();
     }
 
-    // ==========================================================
-    // EXCLUIR (DELETE)
-    // ==========================================================
     public function delete($id) {
         $query = "DELETE FROM " . $this->table_name . " WHERE id = :id";
         $stmt = $this->conn->prepare($query);
@@ -130,9 +120,6 @@ class Projeto {
         return $stmt->execute();
     }
 
-    // ==========================================================
-    // LISTAR TODOS (Admin ou Visão Geral)
-    // ==========================================================
     public function listar() {
         // Traz os dados do projeto E os IDs dos professores vinculados (ids_autores)
         $query = "SELECT p.*, GROUP_CONCAT(pp.id_professor) as ids_autores
@@ -146,9 +133,6 @@ class Projeto {
         return $stmt;
     }
 
-    // ==========================================================
-    // LISTAR POR PROFESSOR
-    // ==========================================================
     public function listarPorProfessor($id_professor) {
         // Seleciona projetos onde o professor é um dos autores
         // Também traz o GROUP_CONCAT para saber quem são os co-autores
@@ -166,9 +150,6 @@ class Projeto {
         return $stmt;
     }
 
-    // ==========================================================
-    // BUSCAR POR ID (Detalhes)
-    // ==========================================================
     public function buscarPorId($id) {
         $query = "SELECT * FROM " . $this->table_name . " WHERE id = ? LIMIT 1";
         $stmt = $this->conn->prepare($query);
