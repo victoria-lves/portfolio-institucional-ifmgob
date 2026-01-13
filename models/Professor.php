@@ -1,5 +1,5 @@
 <?php
-//models/Professor.php
+
 class Professor {
     private $conn;
     private $table = "professor";
@@ -18,7 +18,6 @@ class Professor {
     public $linkedin;
     public $gabinete;
 
-    // Propriedades auxiliares (para compatibilidade legada com Controllers antigos)
     public $foto_perfil;
     public $biografia;
     public $titulacao;
@@ -30,9 +29,7 @@ class Professor {
         $this->conn = $db;
     }
 
-    // ==========================================================
-    // MÉTODO CRIAR
-    // ==========================================================
+
     public function criar() {
         // Mapeamento de Compatibilidade:
         // Se o controller definiu 'foto_perfil', movemos para 'pfp', e assim por diante.
@@ -79,9 +76,6 @@ class Professor {
         return false;
     }
 
-    // ==========================================================
-    // MÉTODO ATUALIZAR
-    // ==========================================================
     public function atualizar() {
         // Mapeamento de Compatibilidade
         $this->pfp = $this->foto_perfil ?? $this->pfp;
@@ -128,9 +122,6 @@ class Professor {
         return false;
     }
 
-    // ==========================================================
-    // MÉTODO DELETAR
-    // ==========================================================
     public function delete($id) {
         $query = "DELETE FROM " . $this->table . " WHERE id = :id";
         $stmt = $this->conn->prepare($query);
@@ -142,9 +133,7 @@ class Professor {
         return false;
     }
 
-    // ==========================================================
-    // MÉTODOS DE LEITURA
-    // ==========================================================
+
     public function listar() {
         $query = "SELECT * FROM " . $this->table . " ORDER BY nome ASC";
         $stmt = $this->conn->prepare($query);
