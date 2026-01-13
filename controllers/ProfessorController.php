@@ -30,7 +30,6 @@ class ProfessorController
         }
     }
 
-    // CRIAR PERFIL (Action: create)
     public function create()
     {
         // 1. Verificar Login
@@ -111,7 +110,6 @@ class ProfessorController
         }
     }
 
-    // ATUALIZAR PERFIL (Action: update)
     public function update()
     {
         if (!isset($_SESSION['usuario_id'])) {
@@ -209,9 +207,6 @@ class ProfessorController
         }
     }
 
-    // ==========================================================
-    // EXCLUIR PROFESSOR (Action: delete)
-    // ==========================================================
     public function delete()
     {
         if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_nivel'] != 'admin') {
@@ -241,16 +236,13 @@ class ProfessorController
                 $_SESSION['erro'] = "Erro: " . $e->getMessage();
             }
 
-            // Redireciona para listagem (assumindo que existe, senão painel)
+            // Redireciona para listagem
             header("Location: ../views/sistema/professor.php"); 
             exit();
         }
     }
 }
 
-// ==========================================================
-// ROTEAMENTO
-// ==========================================================
 if (isset($_GET['action'])) {
     $controller = new ProfessorController();
 
