@@ -1,5 +1,4 @@
 <?php
-// controllers/ProjetoController.php
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -9,7 +8,7 @@ if (session_status() === PHP_SESSION_NONE) {
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../models/Projeto.php';
 
-// Verifica se o manipulador de imagens existe (Opcional, mas recomendado)
+// Verifica se o manipulador de imagens existe
 if (file_exists(__DIR__ . '/../utils/ImageHandler.php')) {
     require_once __DIR__ . '/../utils/ImageHandler.php';
 }
@@ -35,9 +34,6 @@ class ProjetoController
         }
     }
 
-    // ==========================================================
-    // ACTION: CREATE (CRIAR)
-    // ==========================================================
     public function create()
     {
         $this->checkAuth();
@@ -85,9 +81,6 @@ class ProjetoController
         }
     }
 
-    // ==========================================================
-    // ACTION: UPDATE (ATUALIZAR)
-    // ==========================================================
     public function update()
     {
         $this->checkAuth();
@@ -140,9 +133,6 @@ class ProjetoController
         }
     }
 
-    // ==========================================================
-    // ACTION: DELETE (EXCLUIR)
-    // ==========================================================
     public function delete()
     {
         $this->checkAuth();
@@ -170,7 +160,7 @@ class ProjetoController
                 $stmtImgs->execute([$id]);
                 $imagens = $stmtImgs->fetchAll(PDO::FETCH_COLUMN);
 
-                // 2. Excluir do Banco (CASCADE cuida dos vínculos)
+                // 2. Excluir do Banco
                 if ($this->projeto->delete($id)) {
                     // 3. Remover arquivos físicos
                     foreach ($imagens as $arquivo) {
@@ -195,13 +185,6 @@ class ProjetoController
         exit();
     }
 
-    // ==========================================================
-    // MÉTODOS AUXILIARES (PRIVADOS)
-    // ==========================================================
-
-    /**
-     * Preenche as propriedades do objeto Projeto com dados do POST
-     */
     private function preencherDadosProjeto()
     {
         $this->projeto->titulo = $_POST['titulo'];
@@ -226,9 +209,6 @@ class ProjetoController
         $this->projeto->financiamento = !empty($_POST['financiamento']) ? str_replace(',', '.', $_POST['financiamento']) : null;
     }
 
-    /**
-     * Vincula IDs de professores ao projeto na tabela N:N
-     */
     private function vincularProfessores($id_projeto)
     {
         $ids = $_POST['professores'] ?? [];
@@ -247,9 +227,6 @@ class ProjetoController
         }
     }
 
-    /**
-     * Processa o upload de múltiplas imagens (imagens[])
-     */
     private function uploadImagens($id_projeto)
     {
         // Verifica se existem imagens enviadas
@@ -289,7 +266,6 @@ class ProjetoController
                     }
 
                     if ($salvo) {
-                        // Legenda padrão. Você pode criar lógica para 'Capa' se for a primeira imagem.
                         $legenda = ($i == 0) ? 'Capa' : 'Galeria';
                         $stmtImg->execute([$novoNome, $id_projeto, $legenda]);
                     }
