@@ -68,7 +68,6 @@ class AuthController
                                 $_SESSION['professor_id'] = $prof['id'];
                             } else {
                                 // Usuário é professor mas não tem perfil criado ainda
-                                // Opcional: Redirecionar para criar perfil
                             }
                         }
 
