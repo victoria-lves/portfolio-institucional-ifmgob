@@ -1,6 +1,4 @@
 <?php
-// views/producao/create.php
-
 session_start();
 
 // 1. Verificações de Segurança
@@ -31,7 +29,7 @@ if ($_SESSION['usuario_nivel'] == 'admin') {
     }
 }
 
-// 4. Listas Auxiliares (Definidas aqui para a View)
+// 4. Listas Auxiliares
 $tipos = ['Livro', 'Artigo', 'Tese', 'Outro'];
 $idiomas = ['Português (pt-br)', 'Inglês', 'Espanhol', 'Outro'];
 
